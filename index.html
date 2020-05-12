@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <script src="webgl-obj-loader.min.js"></script>
+        <script src="lib/webgl-obj-loader.min.js"></script>
+        <script src="perspective1.js"></script>
+        <script src="parallel.js"></script>
+        <script src="webgl-debug.js"></script>
 		<link rel='stylesheet' href='css/style.css'>
         <script type="text/javascript" src="utils.js"></script>
         <script type="text/javascript" src="help.js"></script>
@@ -11,13 +14,6 @@
 	</head>
 
 <body onLoad="main();">
-
-<!-- 
-<div class="grid-container">
-  <div class="my-canvas"> <canvas id="my-canvas" class="my-canvas"> Your browser doesn't support the Canvas Element! </canvas></div>
-  <div class="sidebar"></div>
-</div>
---!>
 <div class="nav-bar">
   <div class="pane-nav">
 	<div class="accordion">
@@ -32,6 +28,6 @@
   </div>	
 </div>
 <div class="homepage"> 
-<canvas id="my-canvas" class="my-canvas"> No Canvas Element support on your browser! </canvas> </div>
+<canvas id="my-canvas" class="my-canvas" width=1600; height=900 style="background-color:gray"> No Canvas Element support on your browser! </canvas> </div>
 </body>
 </html>
