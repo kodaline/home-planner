@@ -39,6 +39,9 @@ function doMouseMove(event) {
         if((dx != 0) || (dy != 0)) {
             angle = angle + 0.5 * dx;
             elevation = elevation + 0.5 * dy;
+			if (elevation >= 0) {elevation = 0;}
+			if (elevation <= -100) {elevation = -100;}
+			console.log(elevation);
         }
     }
 }
