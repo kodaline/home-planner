@@ -53,6 +53,37 @@ var currentShader = 0;                //Defines the current shader in use.
 var textureInfluence = 0.0;
 var ambientLightInfluence = 0.0;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
+//Parameters for light definition (directional light)
+var dirLightAlpha = -utils.degToRad(60);
+var dirLightBeta  = -utils.degToRad(120);
+
+//Use the Utils 0.2 to use mat3
+var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
+                      Math.sin(dirLightAlpha),
+                      Math.cos(dirLightAlpha) * Math.sin(dirLightBeta),
+                      ];
+
+var matrixPositionHandle = new Array(2);
+var materialDiffColorHandle = new Array(2);
+var lightDirectionHandle = new Array(2);
+var lightPositionHandle = new Array(2);
+var lightColorHandle  = new Array(2);
+var lightTypeHandle = new Array(2);
+var eyePositionHandle = new Array(2);
+var materialSpecColorHandle = new Array(2);
+var materialSpecPowerHandle  = new Array(2);
+var objectSpecularPower = 20.0;
+
+// Eye parameters;
+// We need now 4 eye vector, one for each cube
+// As well as 4 light direction vectors for the same reason
+var observerPositionObj = new Array();
+var lightDirectionObj = new Array();
+var lightPositionObj = new Array();
+
+var lightPosition = [0.0, 3.0, 0.0];
+var lightColor = new Float32Array([1.0, 1.0, 1.0, 1.0]);
+var moveLight = 0; //0 : move the camera - 1 : Move the lights
 // event handler
 
 var mouseState = false;
@@ -139,11 +170,11 @@ function main(){
         for(i=0; i < sceneObjects; i++){ 
             objectWorldMatrix[i] = new utils.identityMatrix();
             projectionMatrix[i] =  new utils.identityMatrix();
-            //diffuseColor[i] = [1.0, 1.0, 1.0, 1.0];
-            //specularColor[i] = [1.0, 1.0, 1.0, 1.0];
-            //observerPositionObj[i] = new Array(3);
-            //lightDirectionObj[i] = new Array(3);
-            //lightPositionObj[i] = new Array(3);
+            diffuseColor[i] = [1.0, 1.0, 1.0, 1.0];
+            specularColor[i] = [1.0, 1.0, 1.0, 1.0];
+            observerPositionObj[i] = new Array(3);
+            lightDirectionObj[i] = new Array(3);
+            lightPositionObj[i] = new Array(3);
         }     
         for (i=0; i < sceneObjects ; i++) {        
             roomVertices = roomModel.meshes[i].vertices;
@@ -175,37 +206,50 @@ function main(){
               if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
             }
 
-            console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
-            var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
-			var getTexture = function(image_URL){                                                                                                                   
+			if(UVFileNamePropertyIndex>=0){
 
+                nTexture[i]=true;
+                console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
+                var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
+		
 
-                var image=new Image();          
-                image.webglTexture=false;   
-                requestCORSIfNotSameOrigin(image, image_URL);                                                                                                           
+		        var getTexture = function(image_URL){                                                                                                                   
+                    var image=new Image();          
+                    image.webglTexture=false;   
+                    requestCORSIfNotSameOrigin(image, image_URL);                                                                                                           
 
-                image.onload=function(e) {                                                                                                                          
+                    image.onload=function(e) {                                                                                                                          
 
-                    var texture=gl.createTexture();                                                                                                                 
-                                                    
-                    gl.bindTexture(gl.TEXTURE_2D, texture);                                                                                                         
-                                                    
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);                                                                              
-                    gl.generateMipmap(gl.TEXTURE_2D);                                                                                                               
-                                                    
-                    gl.bindTexture(gl.TEXTURE_2D, null);
-                    image.webglTexture=texture; 
-               };
-               
-               image.src=image_URL;                                                                                                                                
+                        var texture=gl.createTexture();                                                                                                                 
+                                                        
+                        gl.bindTexture(gl.TEXTURE_2D, texture);                                                                                                         
+                                                        
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+                        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);                                                                              
+                        gl.generateMipmap(gl.TEXTURE_2D);                                                                                                               
+                                                        
+                        gl.bindTexture(gl.TEXTURE_2D, null);
+                        image.webglTexture=texture; 
+                   };
+                    
+                   image.src=image_URL;
 
-               return image;                   
-               };
+                   return image;                   
+                   };
 			diffuseTextureObj[i] = getTexture(modelsDir + imageName);
-        } 
+        	}else {
+                        nTexture[i] = false;
+                    }
+			//*** mesh color
+                diffuseColor[i] = roomModel.materials[meshMatIndex].properties[diffuseColorPropertyIndex].value; // diffuse value
+
+                diffuseColor[i].push(1.0);                                                  // Alpha value added
+
+                specularColor[i] = roomModel.materials[meshMatIndex].properties[specularColorPropertyIndex].value;
+                console.log("Specular: "+ specularColor[i]);
+} 
         loadShaders();
         drawScene();
       
@@ -224,20 +268,52 @@ function main(){
 		cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
     	cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
     	cy = lookRadius * Math.sin(utils.degToRad(-elevation));
-
-        //worldMatrix = utils.MakeWorld(0.0, 0.0, 0.0, cubeRx, cubeRy, cubeRz, 1.0);
-        //var viewWorldMatrix = utils.multiplyMatrices(viewMatrix, worldMatrix);
+		eyeTemp = [cx, cy, cz];
         viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
 		var projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
         for(i=0; i < sceneObjects; i++){
             gl.uniformMatrix4fv(matrixPositionHandle[currentShader], gl.FALSE, utils.transposeMatrix(projectionMatrix));
-			gl.uniform1f(textureInfluenceHandle[currentShader], textureInfluence);
-			gl.uniform1i(textureFileHandle[currentShader], 0);
-            gl.activeTexture(gl.TEXTURE0);
-            gl.uniform1i(textureFileHandle[currentShader], texture);
+			lightDirectionObj[i] = utils.multiplyMatrix3Vector3(utils.transposeMatrix3(utils.sub3x3from4x4(objectWorldMatrix[i])), lightDirection);
 
+        	lightPositionObj[i] = utils.multiplyMatrix3Vector3(utils.invertMatrix3(utils.sub3x3from4x4(objectWorldMatrix[i])),lightPosition);
+
+        	observerPositionObj[i] = utils.multiplyMatrix3Vector3(utils.invertMatrix3(utils.sub3x3from4x4(objectWorldMatrix[i])), eyeTemp);
+			gl.uniform1f(textureInfluenceHandle[currentShader], textureInfluence);
+			gl.uniform1f(ambientLightInfluenceHandle[currentShader], ambientLightInfluence);
+			gl.uniform1i(textureFileHandle[currentShader], 0);
+            if (nTexture[i] == true && diffuseTextureObj[i].webglTexture) {
+				gl.activeTexture(gl.TEXTURE0);
+            	gl.bindTexture(gl.TEXTURE_2D, diffuseTextureObj[i].webglTexture);
+			}
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObjectId[i]);
 
+			gl.uniform4f(lightColorHandle[currentShader], lightColor[0],
+                                                          lightColor[1],
+                                                          lightColor[2],
+                                                          lightColor[3]);
+            gl.uniform4f(materialDiffColorHandle[currentShader], diffuseColor[i][0],
+                                                                 diffuseColor[i][1],
+                                                                 diffuseColor[i][2],
+                                                                 diffuseColor[i][3]);
+
+            gl.uniform4f(materialSpecColorHandle[currentShader], specularColor[i][0],
+                                                                 specularColor[i][1],
+                                                                 specularColor[i][2],
+                                                                 specularColor[i][3]);
+            gl.uniform4f(ambientLightColorHandle[currentShader], ambientLightColor[0],
+                                                                 ambientLightColor[1],
+                                                                 ambientLightColor[2],
+                                                                 ambientLightColor[3]);
+
+			gl.uniform3f(lightDirectionHandle[currentShader], lightDirectionObj[i][0],
+                                                              lightDirectionObj[i][1],
+                                                              lightDirectionObj[i][2]);
+            gl.uniform3f(lightPositionHandle[currentShader], lightPositionObj[i][0],
+                                                              lightPositionObj[i][1],
+                                                              lightPositionObj[i][2]);
+
+            gl.uniform1i(lightTypeHandle[currentShader], currentLightType);
+            gl.uniform1f(materialSpecPowerHandle[currentShader], objectSpecularPower);
             gl.enableVertexAttribArray(vertexPositionHandle[currentShader]);
             gl.vertexAttribPointer(vertexPositionHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 0, 0);
 
@@ -247,6 +323,7 @@ function main(){
             gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 0, 0);
             gl.enableVertexAttribArray(vertexUVHandle[currentShader]);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
+			//console.log(gl.getParameter(gl.TEXTURE_2D));
             gl.drawElements(gl.TRIANGLES, facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
             gl.disableVertexAttribArray(vertexPositionHandle[currentShader]);
             gl.disableVertexAttribArray(vertexNormalHandle[currentShader]);
