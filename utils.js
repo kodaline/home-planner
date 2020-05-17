@@ -258,6 +258,47 @@ createProgram:function(gl, vertexShader, fragmentShader) {
 
 
   //*** MATH LIBRARY
+invertMatrix3: function(m){
+        out = [];
+
+        var a00 = m[0], a01 = m[1], a02 = m[2],
+            a10 = m[3], a11 = m[4], a12 = m[5],
+            a20 = m[6], a21 = m[7], a22 = m[8],
+
+            b01 = a22 * a11 - a12 * a21,
+            b11 = -a22 * a10 + a12 * a20,
+            b21 = a21 * a10 - a11 * a20,
+
+            // Calculate the determinant
+            det = a00 * b01 + a01 * b11 + a02 * b21;
+
+        if (!det) {
+            return null;
+        }
+        det = 1.0 / det;
+
+        out[0] = b01 * det;
+        out[1] = (-a22 * a01 + a02 * a21) * det;
+        out[2] = (a12 * a01 - a02 * a11) * det;
+        out[3] = b11 * det;
+        out[4] = (a22 * a00 - a02 * a20) * det;
+        out[5] = (-a12 * a00 + a02 * a10) * det;
+        out[6] = b21 * det;
+        out[7] = (-a21 * a00 + a01 * a20) * det;
+        out[8] = (a11 * a00 - a01 * a10) * det;
+
+        return out;
+    },
+ // Multiply the mat3 with a vec3.
+    multiplyMatrix3Vector3: function(m, a) {
+
+        out = [];
+        var x = a[0], y = a[1], z = a[2];
+        out[0] = x * m[0] + y * m[1] + z * m[2];
+        out[1] = x * m[3] + y * m[4] + z * m[5];
+        out[2] = x * m[6] + y * m[7] + z * m[8];
+        return out;
+    },
 
   	degToRad: function(angle){
   		return(angle*Math.PI/180);
@@ -270,6 +311,14 @@ createProgram:function(gl, vertexShader, fragmentShader) {
   				0,0,0,1];
   	},
 
+// returns the 3x3 submatrix from a Matrix4x4
+    sub3x3from4x4: function(m){
+        out = [];
+        out[0] = m[0]; out[1] = m[1]; out[2] = m[2];
+        out[3] = m[4]; out[4] = m[5]; out[5] = m[6];
+        out[6] = m[8]; out[7] = m[9]; out[8] = m[10];
+        return out;
+    },
 
   	identityMatrix3: function() {
   		return [1,0,0,
