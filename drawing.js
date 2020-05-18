@@ -116,7 +116,7 @@ function doMouseMove(event) {
 }
 function doMouseWheel(event) {
     var nLookRadius = lookRadius + event.wheelDelta/200.0;
-    if((nLookRadius > 3.0) && (nLookRadius < 100.0)) {
+    if((nLookRadius > 4.0) && (nLookRadius < 100.0)) {
         lookRadius = nLookRadius;
     }
 }
@@ -151,7 +151,7 @@ function main(){
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
       
-        utils.get_json(baseDir + 'models/bed.json', function(loadedModel){roomModel = loadedModel;});
+        utils.get_json(baseDir + 'models/EmptyRoom.json', function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
         perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
@@ -292,6 +292,8 @@ function main(){
 
 }
 	function drawScene() {
+		utils.resizeCanvasToDisplaySize(gl.canvas);
+    	gl.clearColor(0.85, 0.85, 0.85, 1.0);
     	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shaderProgram[currentShader]);
 		cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
