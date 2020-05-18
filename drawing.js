@@ -12,12 +12,13 @@ var cy = 0.0;
 var cz = 0.0;
 var elevation = 0.0;
 var angle = 0.0;
-var texture;
 var vao;
+var roomTexCoords = null;
 var perspectiveMatrix = null;
 var viewMatrix = null;
 var lookRadius = 10.0;
 var currentShader = 0;
+var uvBufferRoom = new Array();
 var vertexNormalHandle = new Array(2);
 var vertexPositionHandle = new Array(2);
 var vertexUVHandle = new Array(2);
@@ -50,7 +51,7 @@ var nTexture        = new Array();  //Number of textures per object
 
 var currentLightType = 1;
 var currentShader = 0;                //Defines the current shader in use.
-var textureInfluence = 0.0;
+var textureInfluence = 1.0;
 var ambientLightInfluence = 0.0;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
 //Parameters for light definition (directional light)
@@ -110,13 +111,12 @@ function doMouseMove(event) {
             elevation = elevation + 0.5 * dy;
 			if (elevation >= 0) {elevation = 0;}
 			if (elevation <= -100) {elevation = -100;}
-			console.log(elevation);
         }
     }
 }
 function doMouseWheel(event) {
     var nLookRadius = lookRadius + event.wheelDelta/200.0;
-    if((nLookRadius > 5.0) && (nLookRadius < 100.0)) {
+    if((nLookRadius > 3.0) && (nLookRadius < 100.0)) {
         lookRadius = nLookRadius;
     }
 }
@@ -129,13 +129,6 @@ function requestCORSIfNotSameOrigin(img, url) {
 
 
 function main(){
-
-    //Cube parameters
-    var cubeRx = 0.0;
-    var cubeRy = 0.0;
-    var cubeRz = 0.0;
-    var cubeS  = 0.5;
-    var lastUpdateTime = (new Date).getTime();
 
 	canvas = document.getElementById("my-canvas");
 	canvas.addEventListener("mousedown", doMouseDown, false);
@@ -158,7 +151,7 @@ function main(){
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
       
-        utils.get_json(baseDir + 'models/EmptyRoom.json', function(loadedModel){roomModel = loadedModel;});
+        utils.get_json(baseDir + 'models/bed.json', function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
         perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
@@ -177,20 +170,21 @@ function main(){
             lightPositionObj[i] = new Array(3);
         }     
         for (i=0; i < sceneObjects ; i++) {        
-            roomVertices = roomModel.meshes[i].vertices;
-            roomIndices = [].concat.apply([], roomModel.meshes[i].faces);
-            console.log("Room Indices:" + roomIndices);
-            facesNumber[i] = roomIndices.length/3; 
-            console.log("Face Number: "+facesNumber[i]);
-            //vertices, normals and UV set 1
-            vertexBufferObjectId[i] = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObjectId[i]);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(roomVertices), gl.STATIC_DRAW);
+            //roomVertices = roomModel.meshes[i].vertices;
+		    //roomTexCoords = roomModel.meshes[i].texturecoords[i];	
+            //roomIndices = [].concat.apply([], roomModel.meshes[i].faces);
+            //console.log("Room Indices:" + roomIndices);
 
-            indexBufferObjectId[i]=gl.createBuffer ();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(roomIndices),gl.STATIC_DRAW);
-
+			//Creating the vertex data.
+            console.log("Object["+i+"]:");
+            console.log("MeshName: "+ roomModel.rootnode.children[i].name);
+            console.log("Vertices: "+ roomModel.meshes[i].vertices.length);
+            console.log("Normals: "+ roomModel.meshes[i].normals.length);
+            if (roomModel.meshes[i].texturecoords){
+                console.log("UVss: " + roomModel.meshes[i].texturecoords[0].length);
+            } else {
+                console.log("No UVs for this mesh!" );
+            }
 
             //creating the objects' world matrix
             objectWorldMatrix[i] = roomModel.rootnode.children[i].transformation;      
@@ -201,10 +195,30 @@ function main(){
             var diffuseColorPropertyIndex = -1;
             var specularColorPropertyIndex = -1;
             for (n = 0; n < roomModel.materials[meshMatIndex].properties.length; n++){
-              if(roomModel.materials[meshMatIndex].properties[n].key == "$tex.file") UVFileNamePropertyIndex = n;
-              if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.diffuse") diffuseColorPropertyIndex = n;
-              if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
+                if(roomModel.materials[meshMatIndex].properties[n].key == "$tex.file") UVFileNamePropertyIndex = n;
+                if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.diffuse") diffuseColorPropertyIndex = n;
+                if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
             }
+			//*** Getting vertex and normals                    
+            var objVertex = [];
+            for (n = 0; n < roomModel.meshes[i].vertices.length/3; n++){
+                objVertex.push(roomModel.meshes[i].vertices[n*3],
+                               roomModel.meshes[i].vertices[n*3+1],
+                               roomModel.meshes[i].vertices[n*3+2]);
+                objVertex.push(roomModel.meshes[i].normals[n*3],
+                               roomModel.meshes[i].normals[n*3+1],
+                               roomModel.meshes[i].normals[n*3+2]);
+                if(UVFileNamePropertyIndex>=0 && roomModel.meshes[i].texturecoords){
+                    objVertex.push( roomModel.meshes[i].texturecoords[0][n*2],
+                                    1.0 - roomModel.meshes[i].texturecoords[0][n*2+1]);
+
+                } else {
+                    objVertex.push( 0.0, 0.0);
+                }
+            }
+
+            facesNumber[i] = roomModel.meshes[i].faces.length; 
+            console.log("Face Number: "+facesNumber[i]);
 
 			if(UVFileNamePropertyIndex>=0){
 
@@ -214,12 +228,11 @@ function main(){
 		
 
 		        var getTexture = function(image_URL){                                                                                                                   
-                    var image=new Image();          
-                    image.webglTexture=false;   
+                var image=new Image();          
+                    image["webGLTexture"] = false;   
                     requestCORSIfNotSameOrigin(image, image_URL);                                                                                                           
 
                     image.onload=function(e) {                                                                                                                          
-
                         var texture=gl.createTexture();                                                                                                                 
                                                         
                         gl.bindTexture(gl.TEXTURE_2D, texture);                                                                                                         
@@ -231,7 +244,7 @@ function main(){
                         gl.generateMipmap(gl.TEXTURE_2D);                                                                                                               
                                                         
                         gl.bindTexture(gl.TEXTURE_2D, null);
-                        image.webglTexture=texture; 
+                        image["webGLTexture"] = texture; 
                    };
                     
                    image.src=image_URL;
@@ -243,16 +256,34 @@ function main(){
                         nTexture[i] = false;
                     }
 			//*** mesh color
-                diffuseColor[i] = roomModel.materials[meshMatIndex].properties[diffuseColorPropertyIndex].value; // diffuse value
+            diffuseColor[i] = roomModel.materials[meshMatIndex].properties[diffuseColorPropertyIndex].value; // diffuse value
 
-                diffuseColor[i].push(1.0);                                                  // Alpha value added
+            diffuseColor[i].push(1.0);                                                  // Alpha value added
 
-                specularColor[i] = roomModel.materials[meshMatIndex].properties[specularColorPropertyIndex].value;
-                console.log("Specular: "+ specularColor[i]);
+            specularColor[i] = roomModel.materials[meshMatIndex].properties[specularColorPropertyIndex].value;
+            console.log("Specular: "+ specularColor[i]);
+            //vertices, normals and UV set 1
+            vertexBufferObjectId[i] = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObjectId[i]);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(objVertex), gl.STATIC_DRAW);
+
+			//Creating index buffer
+            facesData = [];
+            for (n = 0; n < roomModel.meshes[i].faces.length; n++){
+
+                facesData.push( roomModel.meshes[i].faces[n][0],
+                                roomModel.meshes[i].faces[n][1],
+                                roomModel.meshes[i].faces[n][2]
+                                );
+            }
+            indexBufferObjectId[i]=gl.createBuffer ();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(facesData),gl.STATIC_DRAW);
+
+
 } 
-        loadShaders();
-        drawScene();
-      
+		loadShaders();
+     	drawScene(); 
 
 
     }else{
@@ -261,8 +292,6 @@ function main(){
 
 }
 	function drawScene() {
-		utils.resizeCanvasToDisplaySize(gl.canvas);
-    	gl.clearColor(0.85, 0.85, 0.85, 1.0);
     	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(shaderProgram[currentShader]);
 		cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
@@ -280,12 +309,14 @@ function main(){
         	observerPositionObj[i] = utils.multiplyMatrix3Vector3(utils.invertMatrix3(utils.sub3x3from4x4(objectWorldMatrix[i])), eyeTemp);
 			gl.uniform1f(textureInfluenceHandle[currentShader], textureInfluence);
 			gl.uniform1f(ambientLightInfluenceHandle[currentShader], ambientLightInfluence);
+			
 			gl.uniform1i(textureFileHandle[currentShader], 0);
-            if (nTexture[i] == true && diffuseTextureObj[i].webglTexture) {
+            if (nTexture[i] == true && read_prop(diffuseTextureObj[i], "webGLTexture")) {
 				gl.activeTexture(gl.TEXTURE0);
-            	gl.bindTexture(gl.TEXTURE_2D, diffuseTextureObj[i].webglTexture);
+            	gl.bindTexture(gl.TEXTURE_2D, read_prop(diffuseTextureObj[i], "webGLTexture"));
 			}
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObjectId[i]);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
 
 			gl.uniform4f(lightColorHandle[currentShader], lightColor[0],
                                                           lightColor[1],
@@ -314,15 +345,15 @@ function main(){
 
             gl.uniform1i(lightTypeHandle[currentShader], currentLightType);
             gl.uniform1f(materialSpecPowerHandle[currentShader], objectSpecularPower);
+
             gl.enableVertexAttribArray(vertexPositionHandle[currentShader]);
-            gl.vertexAttribPointer(vertexPositionHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 0, 0);
+            gl.vertexAttribPointer(vertexPositionHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 4 * 8, 0);
 
             gl.enableVertexAttribArray(vertexNormalHandle[currentShader]);
-            gl.vertexAttribPointer(vertexNormalHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 0, 0);
+            gl.vertexAttribPointer(vertexNormalHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 3);
 
-            gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 0, 0);
+            gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 6);
             gl.enableVertexAttribArray(vertexUVHandle[currentShader]);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
 			//console.log(gl.getParameter(gl.TEXTURE_2D));
             gl.drawElements(gl.TRIANGLES, facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
             gl.disableVertexAttribArray(vertexPositionHandle[currentShader]);
@@ -380,8 +411,8 @@ function loadShaders(){
             materialDiffColorHandle[i] = gl.getUniformLocation(shaderProgram[i], 'mDiffColor');
             materialSpecColorHandle[i] = gl.getUniformLocation(shaderProgram[i], 'mSpecColor');
             materialSpecPowerHandle[i] = gl.getUniformLocation(shaderProgram[i], 'mSpecPower');
+			
             textureFileHandle[i] = gl.getUniformLocation(shaderProgram[i], 'textureFile');
-
             textureInfluenceHandle[i] = gl.getUniformLocation(shaderProgram[i], 'textureInfluence');
             ambientLightInfluenceHandle[i] = gl.getUniformLocation(shaderProgram[i], 'ambientLightInfluence');
             ambientLightColorHandle[i]= gl.getUniformLocation(shaderProgram[i], 'ambientLightColor');
@@ -402,4 +433,11 @@ function requestCORSIfNotSameOrigin(img, url) {
   if ((new URL(url)).origin !== window.location.origin) {
     img.crossOrigin = "";
   }
+}
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function read_prop(obj, prop) {
+    return obj[prop];
 }
