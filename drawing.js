@@ -151,10 +151,11 @@ function main(){
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
       
-        utils.get_json(baseDir + 'models/EmptyRoom.json', function(loadedModel){roomModel = loadedModel;});
+	    var filename = 'bed/bed.json'
+        utils.get_json(modelsDir + filename, function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
-        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
+        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 500.0);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
 
         vao = gl.createVertexArray();
@@ -225,6 +226,8 @@ function main(){
                 nTexture[i]=true;
                 console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
                 var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
+				imageName = filename.split('/')[0] + '/' + imageName;
+				debugger;
 		
 
 		        var getTexture = function(image_URL){                                                                                                                   
@@ -354,8 +357,8 @@ function main(){
             gl.enableVertexAttribArray(vertexNormalHandle[currentShader]);
             gl.vertexAttribPointer(vertexNormalHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 3);
 
-            gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 6);
             gl.enableVertexAttribArray(vertexUVHandle[currentShader]);
+            gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 6);
 			//console.log(gl.getParameter(gl.TEXTURE_2D));
             gl.drawElements(gl.TRIANGLES, facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
             gl.disableVertexAttribArray(vertexPositionHandle[currentShader]);
