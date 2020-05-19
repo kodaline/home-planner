@@ -52,11 +52,20 @@ var nTexture        = new Array();  //Number of textures per object
 var currentLightType = 1;
 var currentShader = 0;                //Defines the current shader in use.
 var textureInfluence = 1.0;
-var ambientLightInfluence = 0.0;
+var ambientLightInfluence = 0.5;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
 //Parameters for light definition (directional light)
 var dirLightAlpha = -utils.degToRad(60);
 var dirLightBeta  = -utils.degToRad(120);
+
+// for fps limit
+var fps = 30;
+var fpsInterval, startTime, now, then, elapsed;
+var frame = 0;
+var one_second = Date.now();
+var display_fps = 0;
+var fps_html_target;
+var fps_html_current;
 
 //Use the Utils 0.2 to use mat3
 var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
@@ -135,6 +144,8 @@ function main(){
     canvas.addEventListener("mouseup", doMouseUp, false);
     canvas.addEventListener("mousemove", doMouseMove, false);
     canvas.addEventListener("mousewheel", doMouseWheel, false);
+    fps_html_target = document.getElementById("fps");
+    fps_html_current = document.getElementById("display_fps");
 
     try{
     gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("webgl2"));
@@ -150,12 +161,15 @@ function main(){
         gl.clearColor(0.85, 0.85, 0.85, 1.0); 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
-      
-	    var filename = 'bed/bed.json'
+        
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+	    var filename = 'empty_room/sh3d_room_frame.json'
         utils.get_json(modelsDir + filename, function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
-        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 500.0);
+        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
 
         vao = gl.createVertexArray();
@@ -177,6 +191,7 @@ function main(){
             //console.log("Room Indices:" + roomIndices);
 
 			//Creating the vertex data.
+            
             console.log("Object["+i+"]:");
             console.log("MeshName: "+ roomModel.rootnode.children[i].name);
             console.log("Vertices: "+ roomModel.meshes[i].vertices.length);
@@ -227,7 +242,6 @@ function main(){
                 console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
                 var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
 				imageName = filename.split('/')[0] + '/' + imageName;
-				debugger;
 		
 
 		        var getTexture = function(image_URL){                                                                                                                   
@@ -286,6 +300,11 @@ function main(){
 
 } 
 		loadShaders();
+		fpsInterval = 1000 / fps;
+		then = Date.now();
+		startTime = then;
+		one_second = Date.now();
+        fps_html_target.innerHTML = (fps).toFixed(1);
      	drawScene(); 
 
 
@@ -295,6 +314,25 @@ function main(){
 
 }
 	function drawScene() {
+		now = Date.now();
+    	elapsed = now - then;
+		if ((now - one_second) > 1000) {
+			display_fps = frame/(now - one_second);
+            fps_html_current.innerHTML = (display_fps * 1000).toFixed(1);
+			frame = 0;
+			one_second = Date.now();
+}	
+    	// if enough time has elapsed, draw the next frame
+
+    	if (elapsed > fpsInterval) {
+
+            // Get ready for next frame by setting then=now, but also adjust for your
+            // specified fpsInterval not being a multiple of RAF's interval (16.7ms)
+            then = now - (elapsed % fpsInterval);
+
+            // Put your drawing code here
+        
+		frame ++;	
 		utils.resizeCanvasToDisplaySize(gl.canvas);
     	gl.clearColor(0.85, 0.85, 0.85, 1.0);
     	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -364,6 +402,7 @@ function main(){
             gl.disableVertexAttribArray(vertexPositionHandle[currentShader]);
             gl.disableVertexAttribArray(vertexNormalHandle[currentShader]);
         }
+	}
         window.requestAnimationFrame(drawScene);
   }
 
