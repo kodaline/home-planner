@@ -52,7 +52,7 @@ var nTexture        = new Array();  //Number of textures per object
 var currentLightType = 1;
 var currentShader = 0;                //Defines the current shader in use.
 var textureInfluence = 1.0;
-var ambientLightInfluence = 0.5;
+var ambientLightInfluence = 0.35;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
 //Parameters for light definition (directional light)
 var dirLightAlpha = -utils.degToRad(60);
@@ -119,7 +119,7 @@ function doMouseMove(event) {
             angle = angle + 0.5 * dx;
             elevation = elevation + 0.5 * dy;
 			if (elevation >= 0) {elevation = 0;}
-			if (elevation <= -100) {elevation = -100;}
+			if (elevation <= -90) {elevation = -90;}
         }
     }
 }
@@ -162,10 +162,10 @@ function main(){
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
         
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        //gl.enable(gl.BLEND);
+        //gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-	    var filename = 'empty_room/sh3d_room_frame.json'
+	    var filename = 'empty_room/room_rect.json'
         utils.get_json(modelsDir + filename, function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
