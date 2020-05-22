@@ -5,30 +5,31 @@ html, body {
 }
 
 .largefont {
-  bottom: 80%;
-  margin: 5px;
-  color: #404040;
-  text-align: center;
-  font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-  font-size: 16px;
-  border: 1px solid #dee5e8;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
+    bottom: 80%;
+    margin: 5px;
+    color: #404040;
+    text-align: center;
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-size: 16px;
+    border: 1px solid #dee5e8;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
 }
 
 body {  
-        display: flex;
-        box-sizing: border-box;
-        flex-direction: row;   
-        height: 100%;          
-        overflow: hidden;      
-        margin: 0px;           
-        background-color: white;        
+    display: flex;
+    box-sizing: border-box;
+    flex-direction: row;   
+    height: 100%;          
+    overflow: hidden;      
+    margin: 0px;           
+    background-color: white;        
 }
 
 .pane-nav {
-    top: 50%;
-	position: fixed;
+    top: 55%;
+	position: absolute;
     margin: 3px;
+    padding: 5px;
     background-color: #ffffff;
 	text-align: center;
     border-radius: 4px;
@@ -68,10 +69,10 @@ body {
 }
 
 .pane-nav a .fas {
-		font-size: 30px;
-		text-align: center;
-		color: #404040;
-		margin: 0.5em;
+	font-size: 30px;
+	text-align: center;
+	color: #404040;
+	margin: 0.5em;
 }
 
 /** Code for the submenu navigation bar**/
@@ -132,26 +133,29 @@ body {
 }
 
 .top-view {
-border: none;
-background: #404040;
-font-weight: bold !important;
-font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
-color: #ffffff !important;
-padding:0.5em;
-margin: 0.5em;
-text-decoration: none;
-text-align: center;
-text-transform: uppercase;
-border-radius: 6px;
-display: inline-block;
-transition: all 0.3s ease 0s;
+    border: none;
+    font-size: 13px;
+    font-weight: bold !important;
+    background: #404040;
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    color: #ffffff !important;
+    padding:0.5em;
+    margin: 0.5em;
+    text-decoration: none;
+    text-align: center;
+    text-transform: uppercase;
+    border-radius: 6px;
+    display: inline-block;
+    transition: all 0.3s ease 0s;
 }
 
 .top-view:hover {
-color: #404040 !important;
-font-weight: bold !important;
-background: none;
--webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
--moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-transition: all 0.3s ease 0s;
+    font-size: 13px;
+    color: #404040 !important;
+    font-weight: bold !important;
+    background: none;
+    -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+    -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
+    transition: all 0.3s ease 0s;
 }
+

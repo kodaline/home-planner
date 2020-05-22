@@ -68,7 +68,9 @@ var fps_html_target;
 var fps_html_current;
 
 //parameters for room mapping
-var roomList = {'Pianta rettangolare': 'empty_room/room_rect.json', 'Pianta quadrata': 'empty_room/room_square.json', 'Pianta a L': 'empty_room/room_elle.json', 'Pianta semi-esagonale': 'empty_room/room_esa.json'};
+var objectsList = {'Pianta rettangolare': 'empty_room/room_rect.json', 'Pianta quadrata': 'empty_room/room_square.json', 'Pianta a L': 'empty_room/room_elle.json', 'Pianta semi-esagonale': 'empty_room/room_esa.json'};
+
+var submenuVisibility = false; 
 
 //Use the Utils 0.2 to use mat3
 var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
@@ -184,6 +186,9 @@ function main(){
 }
 
 function loadModel(modelName) {
+
+        if (!modelName) return; 
+
         utils.get_json(modelsDir + modelName, function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
@@ -258,7 +263,8 @@ function loadModel(modelName) {
 
                 nTexture[i]=true;
                 console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
-                var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
+                imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
+                    debugger;
 				imageName = modelName.split('/')[0] + '/' + imageName;
 		
 
@@ -498,40 +504,66 @@ function read_prop(obj, prop) {
 (function($){
 	$.fn.styleddropdown = function(){
 		return this.each(function(){
-			var obj = $(this)
+			var obj = $(this);
+                
 			obj.find('.field').click(function() { //onclick event, 'list' fadein
+            /**        
             $.find('.list').forEach(function(e) 
                     {
                             $(e).fadeOut();
-                    });
-			obj.find('.list').fadeIn(400);
-			
+                    });**/
+            if (!submenuVisibility) {
+			    obj.find('.list').fadeIn(400);
+                submenuVisibility = true;
+            }
+            var self = $(this)[0];
+            debugger;
+            if (self.name == "rooms") {
+            
+                obj.find('.list')[0].innerHTML = '\
+		<li>Pianta rettangolare</li>\
+		<li>Pianta quadrata</li>\
+		<li>Pianta a L</li>\
+		<li>Pianta semi-esagonale</li>'
+            }
+            else if (self.name == "furniture") {
+                obj.find('.list')[0].innerHTML = '\
+		<li>Letto</li>\
+		<li>Tavolo da pranzo</li>\
+		<li>Cesso</li>\
+		<li>Frigo</li>'
+                
+            }
 			$(document).keyup(function(event) { //keypress event, fadeout on 'escape'
 				if(event.keyCode == 27) {
 				obj.find('.list').fadeOut(400);
+                submenuVisibility = false;
 				}
 			});
-			
+		/**	
 			obj.find('.list').hover(function(){ },
 				function(){
 					$(this).fadeOut(400);
-				});
-			});
+				});**/
 			obj.find('.list li').click(function() { 
-            var toLoad = roomList[$(this)[0].innerHTML];
+            var toLoad = objectsList[$(this)[0].innerHTML];
             loadModel(toLoad);
 			obj.find('.list').fadeOut(400);
+            submenuVisibility = false;
+			    });
 			});
 		});
 	};
 })(jQuery);
 
 $(function(){
-	$('.size').styleddropdown();
+	$('.accordion').styleddropdown();
 });
 
 function topView() {
-        //lookRadius = ;
-        angle = 0.0;
-        elevation = -90.0;
+     angle = 0.0;
+     elevation = -90.0;
+}
+
+function virtualVisitor() {
 }
