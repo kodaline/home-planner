@@ -67,6 +67,9 @@ var display_fps = 0;
 var fps_html_target;
 var fps_html_current;
 
+//parameters for room mapping
+var roomList = {'Pianta rettangolare': 'empty_room/room_rect.json', 'Pianta quadrata': 'empty_room/EmptyRoom.json'};
+
 //Use the Utils 0.2 to use mat3
 var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
                       Math.sin(dirLightAlpha),
@@ -120,6 +123,7 @@ function doMouseMove(event) {
             elevation = elevation + 0.5 * dy;
 			if (elevation >= 0) {elevation = 0;}
 			if (elevation <= -90) {elevation = -90;}
+            console.log(elevation, angle);
         }
     }
 }
@@ -164,9 +168,23 @@ function main(){
         
         //gl.enable(gl.BLEND);
         //gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        
+		loadShaders();
+		fpsInterval = 1000 / fps;
+		then = Date.now();
+		startTime = then;
+		one_second = Date.now();
+        fps_html_target.innerHTML = (fps).toFixed(1);
+     	drawScene(); 
+    }
 
-	    var filename = 'empty_room/room_rect.json'
-        utils.get_json(modelsDir + filename, function(loadedModel){roomModel = loadedModel;});
+    else{
+            alert("Error: WebGL not supported by your browser!");
+        }
+}
+
+function loadModel(modelName) {
+        utils.get_json(modelsDir + modelName, function(loadedModel){roomModel = loadedModel;});
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
         perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
@@ -241,7 +259,7 @@ function main(){
                 nTexture[i]=true;
                 console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
                 var imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
-				imageName = filename.split('/')[0] + '/' + imageName;
+				imageName = modelName.split('/')[0] + '/' + imageName;
 		
 
 		        var getTexture = function(image_URL){                                                                                                                   
@@ -298,19 +316,7 @@ function main(){
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(facesData),gl.STATIC_DRAW);
 
 
-} 
-		loadShaders();
-		fpsInterval = 1000 / fps;
-		then = Date.now();
-		startTime = then;
-		one_second = Date.now();
-        fps_html_target.innerHTML = (fps).toFixed(1);
-     	drawScene(); 
-
-
-    }else{
-        alert("Error: WebGL not supported by your browser!");
-    }
+    } 
 
 }
 	function drawScene() {
@@ -333,16 +339,19 @@ function main(){
             // Put your drawing code here
         
 		frame ++;	
-		utils.resizeCanvasToDisplaySize(gl.canvas);
-    	gl.clearColor(0.85, 0.85, 0.85, 1.0);
-    	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.useProgram(shaderProgram[currentShader]);
-		cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-    	cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
-    	cy = lookRadius * Math.sin(utils.degToRad(-elevation));
-		eyeTemp = [cx, cy, cz];
-        viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-		var projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
+        if (sceneObjects) {
+		    utils.resizeCanvasToDisplaySize(gl.canvas);
+    	    gl.clearColor(0.85, 0.85, 0.85, 1.0);
+    	    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.useProgram(shaderProgram[currentShader]);
+		    cz = lookRadius * Math.cos(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+    	    cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
+    	    cy = lookRadius * Math.sin(utils.degToRad(-elevation));
+		    eyeTemp = [cx, cy, cz];
+            viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+
+		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
+        }
         for(i=0; i < sceneObjects; i++){
             gl.uniformMatrix4fv(matrixPositionHandle[currentShader], gl.FALSE, utils.transposeMatrix(projectionMatrix));
 			lightDirectionObj[i] = utils.multiplyMatrix3Vector3(utils.transposeMatrix3(utils.sub3x3from4x4(objectWorldMatrix[i])), lightDirection);
@@ -484,4 +493,45 @@ function sleep(ms) {
 
 function read_prop(obj, prop) {
     return obj[prop];
+}
+
+(function($){
+	$.fn.styleddropdown = function(){
+		return this.each(function(){
+			var obj = $(this)
+			obj.find('.field').click(function() { //onclick event, 'list' fadein
+            $.find('.list').forEach(function(e) 
+                    {
+                            $(e).fadeOut();
+                    });
+			obj.find('.list').fadeIn(400);
+			
+			$(document).keyup(function(event) { //keypress event, fadeout on 'escape'
+				if(event.keyCode == 27) {
+				obj.find('.list').fadeOut(400);
+				}
+			});
+			
+			obj.find('.list').hover(function(){ },
+				function(){
+					$(this).fadeOut(400);
+				});
+			});
+			obj.find('.list li').click(function() { 
+            var toLoad = roomList[$(this)[0].innerHTML];
+            loadModel(toLoad);
+			obj.find('.list').fadeOut(400);
+			});
+		});
+	};
+})(jQuery);
+
+$(function(){
+	$('.size').styleddropdown();
+});
+
+function topView() {
+        //lookRadius = ;
+        angle = 0.0;
+        elevation = -90.0;
 }

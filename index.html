@@ -2,8 +2,10 @@
 <html>
 	<head>
         <script src="lib/webgl-obj-loader.min.js"></script>
+        <script src="lib/jquery-3.5.1.js"></script>
         <script src="parallel.js"></script>
         <script src="webgl-debug.js"></script>
+		<link rel='stylesheet' href='css/style.css'>
 		<link rel='stylesheet' href='css/style.css'>
         <script type="text/javascript" src="utils.js"></script>
         <script type="text/javascript" src="help.js"></script>
@@ -21,17 +23,51 @@
         </div>
   <div class="pane-nav">
 	<div class="accordion">
-          <a href="#"><i class="fas fa-cube"></i></a>
+          <div class="size">
+			<a href="#" class="field"><i class="fas fa-cube"></i></a>	
+	<ul class="list">
+		<li>Pianta rettangolare</li>
+		<li>Pianta quadrata</li>
+		<li>Pianta a L</li>
+		<li>Pianta semi-esagonale</li>
+	</ul>
+	      </div>
 <br>
-          <a href="#"><i class="fas fa-couch"></i></i></a>
+          <div class="size">
+          <a href="#" class="field"><i class="fas fa-couch"></i></i></a>
+          <ul class="list">
+          </ul>
+          </div>
 <br>
-          <a href="#"><i class="fas fa-eye"></i></i></a>
+          <div class="size">
+          <a href="#" class="field"><i class="fas fa-eye"></i></i></a>
+          <ul class="list">
+          </ul>
+          </div>
 <br>
-          <a href="#"><i class="fas fa-info-circle"></i></i></a>
+          <div class="size">
+          <a href="#" class="field"><i class="fas fa-info-circle"></i></i></a>
+          <ul class="list">
+          </ul>
+          </div>
 	</div>
   </div>	
+
+                <a href="#" class="top-view" onClick="topView();">top view</a>
+        </div>
 </div>
 <div class="homepage"> 
 <canvas id="my-canvas" class="my-canvas" width=1600; height=900 style="background-color:gray"> No Canvas Element support on your browser! </canvas> </div>
+<!--
+<div class="size">
+	<input type="text" value="choose your size" class="field" readonly="readonly" />
+	<ul class="list">
+		<li>Pianta rettangolare</li>
+		<li>Pianta quadrata</li>
+		<li>Pianta a L</li>
+		<li>Pianta semi-esagonale</li>
+	</ul>
+</div>
+-->
 </body>
 </html>
