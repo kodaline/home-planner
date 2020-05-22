@@ -28,7 +28,7 @@ body {
 .pane-nav {
     top: 50%;
 	position: fixed;
-    margin: 5px;
+    margin: 3px;
     background-color: #ffffff;
 	text-align: center;
     border-radius: 4px;

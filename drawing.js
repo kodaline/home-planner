@@ -68,7 +68,7 @@ var fps_html_target;
 var fps_html_current;
 
 //parameters for room mapping
-var roomList = {'Pianta rettangolare': 'empty_room/room_rect.json', 'Pianta quadrata': 'empty_room/EmptyRoom.json'};
+var roomList = {'Pianta rettangolare': 'empty_room/room_rect.json', 'Pianta quadrata': 'empty_room/room_square.json', 'Pianta a L': 'empty_room/room_elle.json', 'Pianta semi-esagonale': 'empty_room/room_esa.json'};
 
 //Use the Utils 0.2 to use mat3
 var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
