@@ -534,6 +534,10 @@ function read_prop(obj, prop) {
 		<li>Frigo</li>'
                 
             }
+            else if (self.name == "description") {
+                obj.find('.list')[0].innerHTML = '\
+		<li style="cursor:default">A home planner written in WebGL, with a little bit of Javascript, HTML, CSS and JQuery for Computer Graphics project. Read more<a style="text-decoration:none" href="https://dueacaso.it"> here</a></li>' 
+            }
 			$(document).keyup(function(event) { //keypress event, fadeout on 'escape'
 				if(event.keyCode == 27) {
 				obj.find('.list').fadeOut(400);

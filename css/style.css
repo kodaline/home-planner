@@ -76,7 +76,7 @@ body {
 }
 
 /** Code for the submenu navigation bar**/
-.size { position:relative }
+.size { position:relative;}
 .size .field {
 	width:300px; 
     color:#fff; 
@@ -85,16 +85,22 @@ body {
     cursor:pointer;
     font-size:30px;
 	border:solid 1px #FFFFFF;
-	-webkit-transition: all .2s ease-in-out;
-	transition: all .2s ease-in-out;
+	-webkit-transition: all .1s ease-in-out;
+	transition: all .1s ease-in-out;
 }
 .size .field:hover {
 	border:solid 1px #fff;
 	-moz-box-shadow:0 0 5px #999; 
     -webkit-box-shadow:0 0 5px #999; 
-    box-shadow:0 0 5px #999
+    box-shadow:0 0 5px #999;
 }
-.size>ul.list { 
+
+a {color:#FF0000;}         /* Unvisited link  */
+a:visited {color:#00FF00;} /* Visited link    */
+a:hover {color:#FF00FF;}   /* Mouse over link */
+a:active {color:#0000FF;}  /* Selected link   */
+
+.size>* { 
     display:none;
 	position:absolute; 
     left:90px; 
@@ -146,7 +152,7 @@ body {
     text-transform: uppercase;
     border-radius: 6px;
     display: inline-block;
-    transition: all 0.3s ease 0s;
+    transition: all 0.1s ease 0s;
 }
 
 .top-view:hover {
@@ -156,6 +162,6 @@ body {
     background: none;
     -webkit-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
     -moz-box-shadow: 0px 5px 40px -10px rgba(0,0,0,0.57);
-    transition: all 0.3s ease 0s;
+    transition: all 0.1s ease 0s;
 }
 
