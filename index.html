@@ -5,6 +5,8 @@
         <script src="lib/jquery-3.5.1.js"></script>
         <script src="parallel.js"></script>
         <script src="webgl-debug.js"></script>
+        <script src="webgl-utils-gregg.js"></script>
+        <script src="m4.js"></script>
 		<link rel='stylesheet' href='css/style.css'>
 		<link rel='stylesheet' href='css/style.css'>
         <script type="text/javascript" src="utils.js"></script>
@@ -53,5 +55,27 @@
 	</ul>
 </div>
 -->
+<script  id="vertex-shader-3d" type="x-shader/x-vertex">
+attribute vec4 a_position;
+varying vec4 v_position;
+void main() {
+  v_position = a_position;
+  gl_Position = a_position;
+  gl_Position.z = 1.0;
+}
+</script>
+<!-- fragment shader -->
+<script  id="fragment-shader-3d" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform samplerCube u_skybox;
+uniform mat4 u_viewDirectionProjectionInverse;
+
+varying vec4 v_position;
+void main() {
+  vec4 t = u_viewDirectionProjectionInverse * v_position;
+  gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
+}
+</script>
 </body>
 </html>
