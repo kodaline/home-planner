@@ -7,7 +7,7 @@ var vU = [];
 var shaderProgram = new Array(2); //Two handles, one for each shaders' couple. 0 = goureaud; 1 = phong
 
 //Parameters for Camera
-var cx = 4.5;
+var cx = 0.0;
 var cy = 0.0;
 var cz = 0.0;
 var elevation = 0.0;
@@ -40,6 +40,7 @@ var sceneObjects;
 var roomVertices;
 var roomIndices;
 
+var underMouseCursorID = 0;
 var id = 0;
 var currentLightType = 1;
 var currentShader = 0;                //Defines the current shader in use.
@@ -60,6 +61,8 @@ var fps_html_target;
 var fps_html_current;
 
 var uidHandle;
+var translationHandlePicker;
+var rotationMatrixPicker;
 var matrixHandle;
 var positionHandle;
 var fb;
@@ -67,7 +70,12 @@ var attachmentPoint;
 var room = 'room';
 var furniture = 'furniture';
 var roomLoaded = false;
-
+var rotationMatrix = utils.MakeRotateYMatrix(0);
+var currentRotation = 0;
+var currentMoveZ = 0;
+var currentMoveX = 0;
+var rotationMatrixHandle = new Array();
+var loadedObjects = new Array();
 //parameters for room mapping
 var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
@@ -105,9 +113,11 @@ var objectSpecularPower = 20.0;
 var lightPosition = [0.0, 3.0, 0.0];
 var lightColor = new Float32Array([1.0, 1.0, 1.0, 1.0]);
 var moveLight = 0; //0 : move the camera - 1 : Move the lights
+
+var currentControlledObject = 0;
 // event handler
 
-var Tx = 0.0, Ty = -1, Tz = 0.0;
+var Tx = 0.0, Ty = 0.0, Tz = 0.0;
 var mouseState = false;
 var lastMouseX = -100, lastMouseY = -100;
 function doMouseDown(event) {
@@ -150,12 +160,48 @@ function doMouseWheel(event) {
         lookRadius = nLookRadius;
 }
 
+function doDoubleClick(event) {
+    if (underMouseCursorID > 0) {
+        loadedObjects.forEach(i => {
+            if (i.u_id == underMouseCursorID) {
+               playAudio(doubleClick);
+               currentControlledObject = i; 
+            }
+        }); 
+    }
+}
+
+var doubleClick = "/music/selection.wav";
+function playAudio(url) {
+  new Audio(url).play();
+}
+
+function onKeyDown(event) {
+    console.log(event.key);
+    if (currentControlledObject) {
+        if (event.key == 'q') {
+            currentControlledObject.currentRotation += 30;
+        } else if (event.key == 'e') {
+            currentControlledObject.currentRotation -= 30;
+        } else if (event.key == 'w') {
+            currentControlledObject.currentMoveZ -= 0.05;
+        } else if (event.key == 's') {
+            currentControlledObject.currentMoveZ += 0.05;
+        } else if (event.key == 'a') {
+            currentControlledObject.currentMoveX -= 0.05;
+        } else if (event.key == 'd') {
+            currentControlledObject.currentMoveX += 0.05;
+        }
+    }
+}
 function requestCORSIfNotSameOrigin(img, url) {
   if ((new URL(url)).origin !== window.location.origin) {
     img.crossOrigin = "";
   }
 }
 
+
+var lastDownTarget;
 
 function main(){
 
@@ -164,6 +210,9 @@ function main(){
     canvas.addEventListener("mouseup", doMouseUp, false);
     canvas.addEventListener("mousemove", doMouseMove, false);
     canvas.addEventListener("mousewheel", doMouseWheel, false);
+    canvas.addEventListener("dblclick", doDoubleClick, false);
+    document.addEventListener('keydown',onKeyDown,false);
+
     
     fps_html_target = document.getElementById("fps");
     fps_html_current = document.getElementById("display_fps");
@@ -258,15 +307,7 @@ function loadModel(modelName) {
 
         vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
-        id = id + 1; 
-        var u_id =  [
-          ((id >>  0) & 0xFF) / 0xFF,
-          ((id >>  8) & 0xFF) / 0xFF,
-          ((id >> 16) & 0xFF) / 0xFF,
-          ((id >> 24) & 0xFF) / 0xFF,
-        ];
-        var test = u_id[3] | (u_id[2] << 8) | (u_id[1] << 16) | (u_id[0] << 24);
-        console.log(id + "setting: " + test);
+        id = id + 1;
         for(i=0; i < sceneObjects; i++){ 
             objectWorldMatrix[i] = new utils.identityMatrix();
             projectionMatrix[i] =  new utils.identityMatrix();
@@ -307,12 +348,37 @@ function loadModel(modelName) {
                 if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.diffuse") diffuseColorPropertyIndex = n;
                 if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
             }
+
+            var minVertX = 0;
+            var maxVertX = 0;
+            var minVertY = 0;
+            var maxVertY = 0;
+            var minVertZ = 0;
+            var maxVertZ = 0;
+
 			//*** Getting vertex and normals                    
             var objVertex = [];
             for (n = 0; n < roomModel.meshes[i].vertices.length/3; n++){
-                objVertex.push(roomModel.meshes[i].vertices[n*3],
-                               roomModel.meshes[i].vertices[n*3+1],
-                               roomModel.meshes[i].vertices[n*3+2]);
+                var x = roomModel.meshes[i].vertices[n*3];
+                var y = roomModel.meshes[i].vertices[n*3+1];
+                var z = roomModel.meshes[i].vertices[n*3+2];
+                objVertex.push(x, y, z);
+
+                if (x < minVertX)
+                    minVertX = x;
+                if (x > maxVertX)
+                    maxVertX = x;
+
+                if (y < minVertY)
+                    minVertY = y;
+                if (y > maxVertY)
+                    maxVertY = y;
+
+                if (z < minVertZ)
+                    minVertZ = z;
+                if (z > maxVertZ)
+                    maxVertZ = z;
+
                 objVertex.push(roomModel.meshes[i].normals[n*3],
                                roomModel.meshes[i].normals[n*3+1],
                                roomModel.meshes[i].normals[n*3+2]);
@@ -392,7 +458,8 @@ function loadModel(modelName) {
         } 
 
         loadedObjects.push({
-            u_id: u_id,
+            u_id: id,
+            isRoom: objectCharacteristics.type == room,
             sceneObjects: sceneObjects,
             objectWorldMatrix: objectWorldMatrix,
             projectionMatrix: projectionMatrix,
@@ -405,7 +472,13 @@ function loadModel(modelName) {
             lightDirectionObj: lightDirectionObj,
             lightPositionObj: lightPositionObj,
             vertexBufferObjectId: vertexBufferObjectId,
-            indexBufferObjectId: indexBufferObjectId
+            indexBufferObjectId: indexBufferObjectId,
+            currentRotation: 0,
+            currentMoveZ: 0,
+            currentMoveX: 0,
+            x: maxVertX - minVertX,
+            y: maxVertY - minVertY,
+            z: maxVertZ - minVertZ,
         });
 
 }
@@ -478,9 +551,6 @@ function loadModel(modelName) {
     	    cx = lookRadius * Math.sin(utils.degToRad(-angle)) * Math.cos(utils.degToRad(-elevation));
     	    cy = lookRadius * Math.sin(utils.degToRad(-elevation));
 		    eyeTemp = [cx, cy, cz];
-            viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-
-		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
 
             // ------ Draw the objects to the texture --------
 
@@ -501,7 +571,7 @@ function loadModel(modelName) {
                 gl.RGBA,           // format
                 gl.UNSIGNED_BYTE,  // type
                 data);             // typed array to hold result
-            const id = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
+                underMouseCursorID = data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24);
             //console.log("reading pixel " + pixelX + " " + pixelY + " yields" + data);
         
             // ------ Draw the objects to the canvas
@@ -520,8 +590,29 @@ function drawObjects(shaderProgramNumber) {
         gl.useProgram(shader);
 
         loadedObjects.forEach((todraw) => {
+            viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
+            if (!todraw.isRoom) {
+                //Used to move object using "w-a-s-d" 
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.currentMoveX, 0, todraw.currentMoveZ));
+                //Used to rotate object around its center using "q-e"
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2, 0, +todraw.z/2));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, (utils.MakeRotateYMatrix(todraw.currentRotation)));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2, 0, -todraw.z/2));
+            }
+		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
+
             for(i=0; i < todraw.sceneObjects; i++){
                 if (shaderProgramNumber == 0) {
+                    
+                    if (!todraw.isRoom) {
+        	            gl.uniformMatrix4fv(rotationMatrixHandle[currentShader], gl.FALSE, rotationMatrix);
+        	            gl.uniformMatrix4fv(translation[currentShader], gl.FALSE, utils.MakeTranslateMatrix(Tx, Ty, Tz));
+                    } else {
+        	            gl.uniformMatrix4fv(rotationMatrixHandle[currentShader], gl.FALSE, utils.identityMatrix());
+        	            gl.uniformMatrix4fv(translation[currentShader], gl.FALSE, utils.MakeTranslateMatrix(0.0, 0.0, 0.0));
+
+                    }
+
                     gl.uniformMatrix4fv(matrixPositionHandle[currentShader], gl.FALSE, utils.transposeMatrix(projectionMatrix));
     			    todraw.lightDirectionObj[i] = utils.multiplyMatrix3Vector3(utils.transposeMatrix3(utils.sub3x3from4x4(todraw.objectWorldMatrix[i])), lightDirection);
     
@@ -566,7 +657,6 @@ function drawObjects(shaderProgramNumber) {
     
                     gl.uniform1i(lightTypeHandle[currentShader], currentLightType);
                     gl.uniform1f(materialSpecPowerHandle[currentShader], objectSpecularPower);
-        	        gl.uniform4f(translation[currentShader], Tx, Ty, Tz, 0.0);
     
                     gl.enableVertexAttribArray(vertexPositionHandle[currentShader]);
                     gl.vertexAttribPointer(vertexPositionHandle[currentShader], 3, gl.FLOAT, gl.FALSE, 4 * 8, 0);
@@ -585,7 +675,26 @@ function drawObjects(shaderProgramNumber) {
                     gl.bindBuffer(gl.ARRAY_BUFFER, todraw.vertexBufferObjectId[i]);
                     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, todraw.indexBufferObjectId[i]);
                     gl.uniformMatrix4fv(matrixHandle, gl.FALSE, utils.transposeMatrix(projectionMatrix));
-                    gl.uniform4f(uidHandle, todraw.u_id[0], todraw.u_id[1], todraw.u_id[2], todraw.u_id[3]);
+
+                    if (todraw.type == room) {
+                            var u_id = new Array(4);
+                    } else {
+                        var u_id =  [
+                          ((todraw.u_id >>  0) & 0xFF) / 0xFF,
+                          ((todraw.u_id >>  8) & 0xFF) / 0xFF,
+                          ((todraw.u_id >> 16) & 0xFF) / 0xFF,
+                          ((todraw.u_id >> 24) & 0xFF) / 0xFF,
+                        ];
+                    }
+                    gl.uniform4f(uidHandle, u_id[0], u_id[1], u_id[2], u_id[3]);
+                    if (!todraw.isRoom) {
+        	            gl.uniformMatrix4fv(translationHandlePicker, gl.FALSE, utils.MakeTranslateMatrix(Tx, Ty, Tz));
+        	            gl.uniformMatrix4fv(rotationMatrixPicker, gl.FALSE, rotationMatrix);
+                    } else {
+        	            gl.uniformMatrix4fv(rotationMatrixPicker, gl.FALSE, utils.identityMatrix());
+        	            gl.uniformMatrix4fv(translationHandlePicker, gl.FALSE, utils.MakeTranslateMatrix(0.0, 0.0, 0.0));
+
+                    }
                     gl.vertexAttribPointer(positionHandle, 3, gl.FLOAT, gl.FALSE, 4 * 8, 0);
                     gl.enableVertexAttribArray(positionHandle);
                     gl.drawElements(gl.TRIANGLES, todraw.facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
@@ -662,10 +771,13 @@ function loadShaders(){
             lightTypeHandle[i]= gl.getUniformLocation(shaderProgram[i],'lightType');
 
 		    translation[i] = gl.getUniformLocation(shaderProgram[i], 'translation');
+		    rotationMatrixHandle[i] = gl.getUniformLocation(shaderProgram[i], 'rotationMatrix');
         }
         uidHandle = gl.getUniformLocation(shaderProgram[2], 'u_id');
         matrixHandle = gl.getUniformLocation(shaderProgram[2], 'u_matrix');
         positionHandle = gl.getAttribLocation(shaderProgram[2], 'b_position');
+		translationHandlePicker = gl.getUniformLocation(shaderProgram[2], 'translation');
+		rotationMatrixPicker = gl.getUniformLocation(shaderProgram[2], 'rotationMatrix');
 }
 
 
@@ -863,5 +975,3 @@ function cubeMap() {
 
 }
 
-/** Classes **/ 
-var loadedObjects = new Array();
