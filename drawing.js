@@ -10,8 +10,8 @@ var shaderProgram = new Array(2); //Two handles, one for each shaders' couple. 0
 var cx = 0.0;
 var cy = 0.0;
 var cz = 0.0;
-var elevation = 0.0;
-var angle = 0.0;
+var elevation = -35.0;
+var angle = -35.0;
 var vao;
 var roomTexCoords = null;
 var perspectiveMatrix = null;
@@ -25,6 +25,8 @@ var vertexUVHandle = new Array(2);
 var textureFileHandle = new Array(2);
 var textureInfluenceHandle = new Array(2);
 var translation = new Array(2);
+var ambLightInfluenceSkybox = new Array(2);
+var ambLightColorSkybox = new Array(2);
 var ambientLightInfluenceHandle = new Array(2);
 var ambientLightColorHandle = new Array(2);
 var matrixPositionHandle = new Array(2);
@@ -68,12 +70,10 @@ var positionHandle;
 var fb;
 var attachmentPoint;
 var room = 'room';
+var solid = 'solid';
 var furniture = 'furniture';
 var roomLoaded = false;
 var rotationMatrix = utils.MakeRotateYMatrix(0);
-var currentRotation = 0;
-var currentMoveZ = 0;
-var currentMoveX = 0;
 var rotationMatrixHandle = new Array();
 var loadedObjects = new Array();
 //parameters for room mapping
@@ -82,12 +82,13 @@ var objectsList = {
 	'Pianta quadrata': {location: 'empty_room/room_square.json', type: room}, 
     'Pianta a L': {location: 'empty_room/room_elle.json', type: room}, 
     'Pianta semi-esagonale': {location: 'empty_room/room_esa.json', type: room}, 
-    'Letto': {location: 'bed/bed_sh3d.json', type: furniture},
+    'Letto': {location: 'bed/bed.json', type: furniture},
     'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
     'Sedia': {location: '', type: furniture},
     'Sofa': {location: 'sofa2/sofa2.json', type: furniture},
     'Tv-table': {location: '.json', type: furniture},
     'Frigo': {location: '.json', type: furniture},
+    'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
 
 var submenuVisibility = false; 
@@ -114,7 +115,7 @@ var lightPosition = [0.0, 3.0, 0.0];
 var lightColor = new Float32Array([1.0, 1.0, 1.0, 1.0]);
 var moveLight = 0; //0 : move the camera - 1 : Move the lights
 
-var currentControlledObject = 0;
+var currentControlledObject = null;
 // event handler
 
 var Tx = 0.0, Ty = 0.0, Tz = 0.0;
@@ -156,7 +157,7 @@ function doMouseMove(event) {
 function doMouseWheel(event) {
     var nLookRadius = lookRadius + event.wheelDelta/200.0;
 	if (nLookRadius < 2.0) nLookRadius = 2.0;
-	if (nLookRadius > 10.0) nLookRadius = 10.0;
+	if (nLookRadius > 7.0) nLookRadius = 7.0;
         lookRadius = nLookRadius;
 }
 
@@ -164,8 +165,10 @@ function doDoubleClick(event) {
     if (underMouseCursorID > 0) {
         loadedObjects.forEach(i => {
             if (i.u_id == underMouseCursorID) {
-               playAudio(doubleClick);
+               if (i.isFurniture) {
                currentControlledObject = i; 
+               playAudio(doubleClick);
+               }
             }
         }); 
     }
@@ -176,24 +179,71 @@ function playAudio(url) {
   new Audio(url).play();
 }
 
+var movementAlongAxis = 0.1;
+var uniformScale = 0.1;
+var rotationAlongY = 30;
+
 function onKeyDown(event) {
     console.log(event.key);
-    if (currentControlledObject) {
+    if (currentControlledObject && !currentControlledObject.isRoom) {
+
+        //get diffs from current controlled (clicked) object
+        var newPosition = {
+            currentMoveX: currentControlledObject.currentMoveX,
+            currentMoveY: currentControlledObject.currentMoveY,
+            currentMoveZ: currentControlledObject.currentMoveZ,
+            currentRotation: currentControlledObject.currentRotation,
+            currentScale: currentControlledObject.currentScale,
+        };
+
+        //update diffs
         if (event.key == 'q') {
-            currentControlledObject.currentRotation += 30;
+            newPosition.currentRotation += rotationAlongY;
         } else if (event.key == 'e') {
-            currentControlledObject.currentRotation -= 30;
+            newPosition.currentRotation -= rotationAlongY;
         } else if (event.key == 'w') {
-            currentControlledObject.currentMoveZ -= 0.05;
+            newPosition.currentMoveZ -= movementAlongAxis;
         } else if (event.key == 's') {
-            currentControlledObject.currentMoveZ += 0.05;
+            newPosition.currentMoveZ += movementAlongAxis;
         } else if (event.key == 'a') {
-            currentControlledObject.currentMoveX -= 0.05;
+            newPosition.currentMoveX -= movementAlongAxis;
         } else if (event.key == 'd') {
-            currentControlledObject.currentMoveX += 0.05;
+            newPosition.currentMoveX += movementAlongAxis;
+        } else if (event.key == 'z') {
+            newPosition.currentScale += uniformScale;
+        } else if (event.key == 'x') {
+            newPosition.currentScale -= uniformScale;
+        } else if (event.key == 'u') {
+            newPosition.currentMoveY += movementAlongAxis;
+        } else if (event.key == 'i') {
+            newPosition.currentMoveY -= movementAlongAxis;
+        } else if (event.key == 'Delete') {
+            loadedObjects.splice(loadedObjects.indexOf(currentControlledObject));
+            currentControlledObject = null;
+            //avoid checking collision if deleted
+            return;
+        }
+
+        //rebuild object position/dimension for collision check
+        //TODO: add rotation support
+        var objectVars = {
+            originX: currentControlledObject.originX + newPosition.currentMoveX,
+            originY: currentControlledObject.originY + newPosition.currentMoveY,
+            originZ: currentControlledObject.originZ + newPosition.currentMoveZ,
+            x: currentControlledObject.x * newPosition.currentScale,
+            y: currentControlledObject.y * newPosition.currentScale,
+            z: currentControlledObject.z * newPosition.currentScale,
+        }
+
+        if (!checkCollision(currentControlledObject.u_id, objectVars)){
+            //update currentControlledObject with new values
+            Object.keys(newPosition).forEach(function(key) {
+                currentControlledObject[key] = newPosition[key];
+            });
         }
     }
 }
+
 function requestCORSIfNotSameOrigin(img, url) {
   if ((new URL(url)).origin !== window.location.origin) {
     img.crossOrigin = "";
@@ -239,8 +289,9 @@ function main(){
 		startTime = then;
 		one_second = Date.now();
         fps_html_target.innerHTML = (fps).toFixed(1);
-        cubeMap();
-     	drawScene(); 
+        //cubeMap();
+        loadModel('Plane');
+     	drawScene();
     }
 
     else{
@@ -317,6 +368,13 @@ function loadModel(modelName) {
             lightDirectionObj[i] = new Array(3);
             lightPositionObj[i] = new Array(3);
         }     
+        var minVertX = 1110;
+        var maxVertX = -111110;
+        var minVertY = 1110;
+        var maxVertY = -111110;
+        var minVertZ = 1110;
+        var maxVertZ = -11110;
+
         for (i=0; i < sceneObjects ; i++) {        
             //roomVertices = roomModel.meshes[i].vertices;
 		    //roomTexCoords = roomModel.meshes[i].texturecoords[i];	
@@ -349,13 +407,6 @@ function loadModel(modelName) {
                 if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
             }
 
-            var minVertX = 0;
-            var maxVertX = 0;
-            var minVertY = 0;
-            var maxVertY = 0;
-            var minVertZ = 0;
-            var maxVertZ = 0;
-
 			//*** Getting vertex and normals                    
             var objVertex = [];
             for (n = 0; n < roomModel.meshes[i].vertices.length/3; n++){
@@ -379,16 +430,21 @@ function loadModel(modelName) {
                 if (z > maxVertZ)
                     maxVertZ = z;
 
-                objVertex.push(roomModel.meshes[i].normals[n*3],
-                               roomModel.meshes[i].normals[n*3+1],
-                               roomModel.meshes[i].normals[n*3+2]);
-                if(UVFileNamePropertyIndex>=0 && roomModel.meshes[i].texturecoords){
-                    objVertex.push( roomModel.meshes[i].texturecoords[0][n*2],
-                                    1.0 - roomModel.meshes[i].texturecoords[0][n*2+1]);
-
+                debugger;
+                if (objectCharacteristics.type == solid) {
+                        objVertex.push(0.0, 0.0, 0.0, 0.0, 0.0)
                 } else {
-                    objVertex.push( 0.0, 0.0);
-                }
+                    objVertex.push(roomModel.meshes[i].normals[n*3],
+                                   roomModel.meshes[i].normals[n*3+1],
+                                   roomModel.meshes[i].normals[n*3+2]);
+                    if(UVFileNamePropertyIndex>=0 && roomModel.meshes[i].texturecoords){
+                        objVertex.push( roomModel.meshes[i].texturecoords[0][n*2],
+                                        1.0 - roomModel.meshes[i].texturecoords[0][n*2+1]);
+
+                    } else {
+                        objVertex.push( 0.0, 0.0);
+                    }
+                }   
             }
 
             facesNumber[i] = roomModel.meshes[i].faces.length; 
@@ -460,6 +516,8 @@ function loadModel(modelName) {
         loadedObjects.push({
             u_id: id,
             isRoom: objectCharacteristics.type == room,
+            isFurniture: objectCharacteristics.type == furniture,
+            isSolid: objectCharacteristics.type == solid,
             sceneObjects: sceneObjects,
             objectWorldMatrix: objectWorldMatrix,
             projectionMatrix: projectionMatrix,
@@ -474,11 +532,16 @@ function loadModel(modelName) {
             vertexBufferObjectId: vertexBufferObjectId,
             indexBufferObjectId: indexBufferObjectId,
             currentRotation: 0,
+            currentScale: 1,
             currentMoveZ: 0,
+            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY : (objectCharacteristics.type == room ? 0 : -minVertY),
             currentMoveX: 0,
             x: maxVertX - minVertX,
             y: maxVertY - minVertY,
             z: maxVertZ - minVertZ,
+            originX: minVertX,
+            originY: minVertY,
+            originZ: minVertZ,
         });
 
 }
@@ -512,6 +575,8 @@ function loadModel(modelName) {
     gl.uniformMatrix4fv(
         viewDirectionProjectionInverseLocation, false,
         projectionMatrix);
+    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
+    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
 
     // Tell the shader to use texture unit 0 for u_skybox
     gl.uniform1i(skyboxLocation, 0);
@@ -578,7 +643,7 @@ function loadModel(modelName) {
         
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-			drawSkyBox();
+			//drawSkyBox();
             drawObjects(currentShader);
 
         }
@@ -591,14 +656,18 @@ function drawObjects(shaderProgramNumber) {
 
         loadedObjects.forEach((todraw) => {
             viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
-            if (!todraw.isRoom) {
-                //Used to move object using "w-a-s-d" 
-                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.currentMoveX, 0, todraw.currentMoveZ));
-                //Used to rotate object around its center using "q-e"
+
+            //Used to scale the object with "z-x"
+            viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeScaleMatrix(todraw.currentScale));
+
+            //Used to rotate object around its center using "q-e"
+            if (todraw.currentRotation){
                 viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2, 0, +todraw.z/2));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, (utils.MakeRotateYMatrix(todraw.currentRotation)));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2, 0, -todraw.z/2));
             }
+            //Used to move object using "w-a-s-d-u-i" 
+            viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.currentMoveX, todraw.currentMoveY, todraw.currentMoveZ));
 		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
 
             for(i=0; i < todraw.sceneObjects; i++){
@@ -770,14 +839,10 @@ function loadShaders(){
             lightColorHandle[i] = gl.getUniformLocation(shaderProgram[i], 'lightColor');
             lightTypeHandle[i]= gl.getUniformLocation(shaderProgram[i],'lightType');
 
-		    translation[i] = gl.getUniformLocation(shaderProgram[i], 'translation');
-		    rotationMatrixHandle[i] = gl.getUniformLocation(shaderProgram[i], 'rotationMatrix');
         }
         uidHandle = gl.getUniformLocation(shaderProgram[2], 'u_id');
         matrixHandle = gl.getUniformLocation(shaderProgram[2], 'u_matrix');
         positionHandle = gl.getAttribLocation(shaderProgram[2], 'b_position');
-		translationHandlePicker = gl.getUniformLocation(shaderProgram[2], 'translation');
-		rotationMatrixPicker = gl.getUniformLocation(shaderProgram[2], 'rotationMatrix');
 }
 
 
@@ -901,6 +966,8 @@ function cubeMap() {
   program = webglUtils.createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
 
   positionLocation = gl.getAttribLocation(program, "a_position");
+  ambLightColorSkybox = gl.getUniformLocation(program, "ambientLightColor");
+  ambLightInfluenceSkybox = gl.getUniformLocation(program, "ambientLightInfluence");
 
   // lookup uniforms
   skyboxLocation = gl.getUniformLocation(program, "u_skybox");
@@ -921,11 +988,11 @@ function cubeMap() {
   const faceInfos = [
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-      url: '/img/sky.png',
+      url: '/img/sky_posx1.png',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-      url: '/img/sky.png',
+      url: '/img/sky_negx1.png',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
@@ -937,11 +1004,11 @@ function cubeMap() {
     },
     {
       target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-      url: '/img/sky.png',
+      url: '/img/sky_posz1.png',
     },
     {
       target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-      url: '/img/sky.png',
+      url: '/img/sky_negz1.png',
     },
   ];
   faceInfos.forEach((faceInfo) => {
@@ -974,4 +1041,72 @@ function cubeMap() {
   gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
 
 }
+
+function generalUsageInfo() {
+
+}
+
+function checkCollision(objectId, objectB) {
+
+        for (i=0; i < loadedObjects.length; i++) { 
+            //rebuild object position/dimension for collision check
+            objectA = {
+                u_id: loadedObjects[i].u_id,
+                isRoom: loadedObjects[i].isRoom,
+                originX: loadedObjects[i].originX + loadedObjects[i].currentMoveX,
+                originY: loadedObjects[i].originY + loadedObjects[i].currentMoveY,
+                originZ: loadedObjects[i].originZ + loadedObjects[i].currentMoveZ,
+                x: loadedObjects[i].x * loadedObjects[i].currentScale,
+                y: loadedObjects[i].y * loadedObjects[i].currentScale,
+                z: loadedObjects[i].z * loadedObjects[i].currentScale,
+            }
+            if (objectA.u_id != objectId && 
+                !objectA.isRoom &&
+                (objectA.originX + objectA.x >= objectB.originX) && (objectB.originX + objectB.x >= objectA.originX) &&
+                (objectA.originY + objectA.y >= objectB.originY) && (objectB.originY + objectB.y >= objectA.originY) &&
+                (objectA.originZ + objectA.z >= objectB.originZ) && (objectB.originZ + objectB.z >= objectA.originZ)) return true;
+        }
+        return false;
+}
+
+  // Draw the scene.
+  function drawPlane() {
+
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
+
+    // Turn on the position attribute
+    gl.enableVertexAttribArray(positionLocation);
+
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 2;          // 2 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+        positionLocation, size, type, normalize, stride, offset);
+
+    
+    // Set the uniforms
+    gl.uniformMatrix4fv(
+        viewDirectionProjectionInverseLocation, false,
+        projectionMatrix);
+    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
+    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
+
+    // Tell the shader to use texture unit 0 for u_skybox
+    gl.uniform1i(skyboxLocation, 0);
+
+    // let our quad pass the depth test at 1.0
+    gl.depthFunc(gl.LEQUAL);
+
+    // Draw the geometry.
+    gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
+    gl.disableVertexAttribArray(positionLocation);
+  }
+
 
