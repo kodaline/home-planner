@@ -26,7 +26,7 @@ body {
 }
 
 .pane-nav {
-    top: 55%;
+    top: 60%;
 	position: absolute;
     margin: 3px;
     padding: 5px;
@@ -73,6 +73,14 @@ body {
 	text-align: center;
 	color: #404040;
 	margin: 0.5em;
+    transition: 0.2s;
+}
+
+.pane-nav .fas:hover,
+.pane-nav .fas:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /** Code for the submenu navigation bar**/
@@ -220,19 +228,84 @@ a:active {color:#0000FF;}  /* Selected link   */
 }
 
 /* The Close Button */
-.close {
-  position: absolute;
+.open {
+  position: fixed;
   top: 25px;
-  right: 35px;
-  color: #f1f1f1;
-  font-size: 75px;
+  right: 25px;
+  color: #404040;
+  font-size: 30px;
   font-weight: bold;
-  transition: 0.3s;
+  transition: 0.2s;
 }
 
-.close:hover,
-.close:focus {
+.open:hover,
+.open:focus {
   color: #bbb;
   text-decoration: none;
   cursor: pointer;
 }
+
+/* Add Animation */
+.run-animation {
+  -webkit-animation-name: zoom;
+  -webkit-animation-duration: 0.6s;
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+
+
+.options-menu { 
+    display: none;
+	position: fixed; 
+    right:10px; 
+    top: 10px; 
+    z-index:999;
+	width:300px;
+	margin:0; 
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    padding:10px; 
+    list-style:none;
+	background:#fff; 
+    color:#333;
+	-moz-border-radius:5px; 
+    -webkit-border-radius:5px; 
+    border-radius:5px;
+	-moz-box-shadow:0 0 5px #999; 
+    -webkit-box-shadow:0 0 5px #999; 
+    box-shadow:0 0 5px #999
+}
+
+.fa {
+	font-size: 20px;
+    position: absolute;
+	color: #404040;
+    top: 25px;
+    right: 25px;
+    transition: 0.2s;
+}
+
+
+.fa:hover,
+.fa:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.light-icon { 
+	position: fixed; 
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    padding-top:10px; 
+    padding-bottom:10px; 
+    padding-left:15px; 
+    padding-right:15px; 
+    list-style:none;
+	background:#fff; 
+	-moz-border-radius:5px; 
+    -webkit-border-radius:5px; 
+    border-radius:5px;
+	-moz-box-shadow:0 0 5px #999; 
+    -webkit-box-shadow:0 0 5px #999; 
+    box-shadow:0 0 5px #999
+}
+

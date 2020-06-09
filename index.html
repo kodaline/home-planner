@@ -44,7 +44,48 @@
         </div>
 </div>
 <div class="homepage"> 
-<canvas id="my-canvas" class="my-canvas" width=1600; height=900 style="background-color:gray"> No Canvas Element support on your browser! </canvas> </div>
+<canvas id="my-canvas" class="my-canvas" width=1600; height=900 style="background-color:gray"> No Canvas Element support on your browser! </canvas> 
+</div>
+
+<span class="open light-icon"><i class="fas fa-lightbulb"></i></span>
+
+<div class="options-menu run-animation" id="lights-menu">
+        <span id="close"><i class="fa fa-times" aria-hidden="true"></i>
+</span>
+
+<td style="background-color: white; font-family: courier; padding: 5px;">                                                                                           
+        <div id="options">
+            <p><b> Light Source </b></p>    
+            <form>
+                <input type="radio" name="light" id="yesl" onchange="updateLightType(this.value);" value="1" checked> Directional <br/>
+                <input type="radio" name="light" onchange="updateLightType(this.value);" value="2" > Point <br/>
+                <input type="radio" name="light" onchange="updateLightType(this.value);" value="3" > Point w. Decay <br/>
+                <input type="radio" name="light" onchange="updateLightType(this.value);" value="4" > Spot <br/>
+                <input type="radio" name="light" id="nol" onchange="updateLightType(this.value);" value="5" > [NO Light] <br/>                                                  
+            </form>
+            <p><b> Light Computation </b></p>
+            <form>
+                <input type="radio" name="type" onchange="updateShader(this.value);" value="1" > Per Vertex <br/>
+                <input type="radio" name="type" onchange="updateShader(this.value);" value="0" checked> Per Fragment <br/>                                                      
+            </form>         
+            <p><b> Texture Influence </b></p>
+            <div id="slider1"> 0                
+                <input id="slide1" type="range" min="0" max="1" step="0.1" value="1" onchange="updateTextureInfluence(this.value);"/> 1 <br/>                                   
+            </div>  
+            <p><b> Ambient Light Influence </b></p>
+            <div id="slider1">  0               
+                <input id="slide2" type="range" min="0" max="1" step="0.1" value="0.5" onchange="updateAmbientLightInfluence(this.value);"/> 1 <br/>                              
+                <p><b>  Ambient Light Color </b></p>
+                <p align="center">              
+                <input id="colorPicker" type="color" value="#FFFFFF" onchange="updateAmbientLightColor(this.value);"/>
+                </p>
+            </div>
+            
+            <p><b> Movement </b></p>        
+                <input type="checkbox" id="chbx" onclick="updateLightMovement();"/> Move Lights<br/>
+            </td>
+</div>
+            </div>
 
 <script  id="vertex-shader-3d" type="x-shader/x-vertex">
 attribute vec4 a_position;
@@ -68,5 +109,24 @@ void main() {
   gl_FragColor = textureCube(u_skybox, normalize(t.xyz / t.w));
 }
 </script>
+
+<script>
+
+var lightsMenu = document.getElementById("lights-menu");
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("open")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  lightsMenu.style.display = "block";
+}
+// Get the <span> element that closes the modal
+close = document.getElementById("close");
+// When the user clicks on <span> (x), close the modal
+close.onclick = function() {
+  lightsMenu.style.display = "none";
+}
+</script>
+
 </body>
 </html>

@@ -47,7 +47,7 @@ var id = 0;
 var currentLightType = 1;
 var currentShader = 0;                //Defines the current shader in use.
 var textureInfluence = 1.0;
-var ambientLightInfluence = 0.45;
+var ambientLightInfluence = 0.1;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
 //Parameters for light definition (directional light)
 var dirLightAlpha = -utils.degToRad(60);
@@ -79,19 +79,17 @@ var loadedObjects = new Array();
 //parameters for room mapping
 var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
-	'Pianta quadrata': {location: 'empty_room/room_square.json', type: room}, 
+	'Pianta quadrata': {location: 'empty_room/square_room.json', type: room}, 
     'Pianta a L': {location: 'empty_room/room_elle.json', type: room}, 
     'Pianta semi-esagonale': {location: 'empty_room/room_esa.json', type: room}, 
     'Letto': {location: 'bed/bed.json', type: furniture},
+    'Guardaroba': {location: 'wardrobe/wardrobe.json', type: furniture},
     'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
-    'Sedia': {location: '', type: furniture},
     'Sofa': {location: 'sofa2/sofa2.json', type: furniture},
-    'Tv-table': {location: '.json', type: furniture},
-    'Frigo': {location: '.json', type: furniture},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
 
-var submenuVisibility = false; 
+var submenuVisibility = null; 
 
 //Use the Utils 0.2 to use mat3
 var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
@@ -256,6 +254,7 @@ var lastDownTarget;
 function main(){
 
 	canvas = document.getElementById("my-canvas");
+    checkbox = document.getElementById("chbx");
 	canvas.addEventListener("mousedown", doMouseDown, false);
     canvas.addEventListener("mouseup", doMouseUp, false);
     canvas.addEventListener("mousemove", doMouseMove, false);
@@ -282,7 +281,6 @@ function main(){
         gl.clearColor(0.85, 0.85, 0.85, 1.0); 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
-        
 		loadShaders();
 		fpsInterval = 1000 / fps;
 		then = Date.now();
@@ -534,7 +532,7 @@ function loadModel(modelName) {
             currentRotation: 0,
             currentScale: 1,
             currentMoveZ: 0,
-            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY : (objectCharacteristics.type == room ? 0 : -minVertY),
+            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY : (objectCharacteristics.type == room ? -minVertY : -minVertY),
             currentMoveX: 0,
             x: maxVertX - minVertX,
             y: maxVertY - minVertY,
@@ -870,11 +868,19 @@ function read_prop(obj, prop) {
                     {
                             $(e).fadeOut();
                     });**/
+            var self = $(this)[0];
             if (!submenuVisibility) {
 			    obj.find('.list').fadeIn(400);
-                submenuVisibility = true;
+                submenuVisibility = self.name;
+            } else {
+                    if (submenuVisibility == self.name) {
+                        obj.find('.list').fadeOut(400);
+                        submenuVisibility = null;
+                    } else {
+                        submenuVisibility = self.name;
+                    }
             }
-            var self = $(this)[0];
+            
             if (self.name == "rooms") {
             
                 obj.find('.list')[0].innerHTML = '\
@@ -886,10 +892,9 @@ function read_prop(obj, prop) {
             else if (self.name == "furniture") {
                 obj.find('.list')[0].innerHTML = '\
 		<li>Letto</li>\
+		<li>Guardaroba</li>\
 		<li>Tavolino</li>\
-		<li>Sedia</li>\
 		<li>Sofa</li>\
-		<li>Tv-table</li>\
 		<li>Frigo</li>'
                 
             }
@@ -1109,4 +1114,38 @@ function checkCollision(objectId, objectB) {
     gl.disableVertexAttribArray(positionLocation);
   }
 
+//Called when the slider for texture influence is changed
+function updateTextureInfluence(val){
+    textureInfluence = val;
+}
+
+function updateLightType(val){
+    currentLightType = parseInt(val);
+}
+
+function updateLightMovement(){
+        if (checkbox.checked == true) {
+            moveLight = 1;
+        } else {
+            moveLight = 0;
+        }
+}
+
+function updateShader(val){
+    currentShader = parseInt(val);
+}
+
+function updateAmbientLightInfluence(val){
+    ambientLightInfluence = val;
+}
+
+function updateAmbientLightColor(val){
+
+    val = val.replace('#','');
+    ambientLightColor[0] = parseInt(val.substring(0,2), 16) / 255;
+    ambientLightColor[1] = parseInt(val.substring(2,4), 16) / 255;
+    ambientLightColor[2] = parseInt(val.substring(4,6), 16) / 255;
+    ambientLightColor[3] = 1.0;
+
+}
 
