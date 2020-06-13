@@ -42,6 +42,8 @@ var sceneObjects;
 var roomVertices;
 var roomIndices;
 
+var nearPlane = 0.1;
+var farPlane = 100;
 var underMouseCursorID = 0;
 var id = 0;
 var currentLightType = 1;
@@ -85,7 +87,7 @@ var objectsList = {
     'Letto': {location: 'bed/bed.json', type: furniture},
     'Guardaroba': {location: 'wardrobe/wardrobe.json', type: furniture},
     'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
-    'Sofa': {location: 'sofa2/sofa2.json', type: furniture},
+    'Sofa': {location: 'sofa/sofa.json', type: furniture},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
 
@@ -351,7 +353,7 @@ function loadModel(modelName) {
         }
         sceneObjects = roomModel.meshes.length; 
 		console.log(sceneObjects);
-        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, 0.1, 100.0);
+        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, nearPlane, farPlane);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
 
         vao = gl.createVertexArray();
@@ -428,7 +430,6 @@ function loadModel(modelName) {
                 if (z > maxVertZ)
                     maxVertZ = z;
 
-                debugger;
                 if (objectCharacteristics.type == solid) {
                         objVertex.push(0.0, 0.0, 0.0, 0.0, 0.0)
                 } else {
@@ -870,11 +871,11 @@ function read_prop(obj, prop) {
                     });**/
             var self = $(this)[0];
             if (!submenuVisibility) {
-			    obj.find('.list').fadeIn(400);
+			    obj.find('.list').fadeIn(300);
                 submenuVisibility = self.name;
             } else {
                     if (submenuVisibility == self.name) {
-                        obj.find('.list').fadeOut(400);
+                        obj.find('.list').fadeOut(300);
                         submenuVisibility = null;
                     } else {
                         submenuVisibility = self.name;
@@ -904,19 +905,14 @@ function read_prop(obj, prop) {
             }
 			$(document).keyup(function(event) { //keypress event, fadeout on 'escape'
 				if(event.keyCode == 27) {
-				obj.find('.list').fadeOut(400);
+				obj.find('.list').fadeOut(300);
                 submenuVisibility = false;
 				}
 			});
-		/**	
-			obj.find('.list').hover(function(){ },
-				function(){
-					$(this).fadeOut(400);
-				});**/
 			obj.find('.list li').click(function() { 
             var toLoad = $(this)[0].innerHTML;
             loadModel(toLoad);
-			obj.find('.list').fadeOut(400);
+			obj.find('.list').fadeOut(300);
             submenuVisibility = false;
 			    });
 			});
@@ -934,6 +930,8 @@ function topView() {
 }
 
 function virtualVisitor() {
+        elevation = -25;
+        angle = -15;
 }
 
 // Fill the buffer with the values that define a quad.

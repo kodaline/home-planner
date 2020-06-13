@@ -93,8 +93,6 @@ body {
     cursor:pointer;
     font-size:30px;
 	border:solid 1px #FFFFFF;
-	-webkit-transition: all .1s ease-in-out;
-	transition: all .1s ease-in-out;
 }
 .size .field:hover {
 	border:solid 1px #fff;
@@ -113,7 +111,6 @@ a:active {color:#0000FF;}  /* Selected link   */
 	position:absolute; 
     left:90px; 
     top:-30px; 
-    z-index:999;
 	width:300px;
 	margin:0; 
     padding:10px; 
@@ -173,50 +170,6 @@ a:active {color:#0000FF;}  /* Selected link   */
     transition: all 0.1s ease 0s;
 }
 
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 25px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: #000000; /* Fallback color */
-  background-color: rgba(0,0,0,0.8); /* Black w/ opacity */
-
-}
-
-/* Modal Content (image) */
-.modal-content {
-  display: block;
-  width: 80%;
-  margin: auto;
-  margin-bottom: 25px;
-}
-
-/* Caption of Modal Image */
-#caption {
-  margin: auto;
-  display: block;
-  width: 80%;
-  max-width: 700px;
-  text-align: center;
-  color: #ccc;
-  padding: 10px 0;
-  height: 150px;
-}
-
-/* Add Animation */
-.modal-content, #caption {
-  -webkit-animation-name: zoom;
-  -webkit-animation-duration: 0.6s;
-  animation-name: zoom;
-  animation-duration: 0.6s;
-}
-
 @-webkit-keyframes zoom {
   from {-webkit-transform:scale(0)}
   to {-webkit-transform:scale(1)}
@@ -258,8 +211,8 @@ a:active {color:#0000FF;}  /* Selected link   */
     display: none;
 	position: fixed; 
     right:10px; 
+    z-index: 999;
     top: 10px; 
-    z-index:999;
 	width:300px;
 	margin:0; 
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
@@ -309,3 +262,66 @@ a:active {color:#0000FF;}  /* Selected link   */
     box-shadow:0 0 5px #999
 }
 
+.legend { 
+    list-style:none;
+	background:#fff; 
+    color:#333;
+    z-index: 100;
+    border-style: dashed;
+    border-color: red;
+	-moz-border-radius:5px; 
+    -webkit-border-radius:5px; 
+    border-radius:5px;
+	-moz-box-shadow:0 0 5px #999; 
+    -webkit-box-shadow:0 0 5px #999; 
+    box-shadow:0 0 5px #999
+    display: block;
+    padding: 15px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+    font-size: normal;
+}
+
+.svg {
+    display: flex;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-direction: row;   
+}
+
+.svg-1 {
+        text-align: left;
+        flex: 1 0 40%;
+}
+
+.svg-2 {
+        text-align: left;
+        font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
+        font-size: 15px;
+        flex: 1 0 50%;
+}
+.svg-img {
+    height: 60%;
+    width: 60%;
+}
+
+hr + p {
+        margin-top: 15px;
+}
+
+p + hr {
+        margin-top: 15px;
+}
+hr {
+border: 0;
+  height: 1px;
+  background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+  background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+}

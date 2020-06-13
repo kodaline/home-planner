@@ -27,7 +27,7 @@
      <div class="accordion">
           <div class="size">
              <div class="upside-menu"><i class="fas fa-arrow-left" style="position:left"></i> <i class="fas fa-times-circle" style="position:right"></i></div>
-	            <ul class="list">
+	            <ul class="list run-animation">
 	            </ul>
 	      </div>
 			<a href="#" class="field" name="rooms"><i class="fas fa-cube"></i></a>	
@@ -37,7 +37,7 @@
           <a href="#" class="field" name="description"><i class="fas fa-info-circle"></i></i></a>
 	</div>
   </div>	
-                <a href="#" class="top-view" style="position: bottom" onClick="generalUsageInfo();">general info</a>
+                <a id="general-info" href="#" class="top-view" style="position: bottom">general info</a>
 
                 <a href="#" class="top-view" onClick="topView();">top view</a>
                 <a href="#" class="top-view" onClick="virtualVisitor();">virtual view</a>
@@ -59,7 +59,6 @@
             <form>
                 <input type="radio" name="light" id="yesl" onchange="updateLightType(this.value);" value="1" checked> Directional <br/>
                 <input type="radio" name="light" onchange="updateLightType(this.value);" value="2" > Point <br/>
-                <input type="radio" name="light" onchange="updateLightType(this.value);" value="3" > Point w. Decay <br/>
                 <input type="radio" name="light" onchange="updateLightType(this.value);" value="4" > Spot <br/>
                 <input type="radio" name="light" id="nol" onchange="updateLightType(this.value);" value="5" > [NO Light] <br/>                                                  
             </form>
@@ -74,7 +73,7 @@
             </div>  
             <p><b> Ambient Light Influence </b></p>
             <div id="slider1">  0               
-                <input id="slide2" type="range" min="0" max="1" step="0.1" value="0.5" onchange="updateAmbientLightInfluence(this.value);"/> 1 <br/>                              
+                <input id="slide2" type="range" min="0" max="1" step="0.1" value="0.1" onchange="updateAmbientLightInfluence(this.value);"/> 1 <br/>                              
                 <p><b>  Ambient Light Color </b></p>
                 <p align="center">              
                 <input id="colorPicker" type="color" value="#FFFFFF" onchange="updateAmbientLightColor(this.value);"/>
@@ -86,6 +85,33 @@
             </td>
 </div>
             </div>
+<div id="legend" class="legend">
+        <span id="close-legend"><i class="fa fa-times" aria-hidden="true"></i></span>
+        <h3> Useful instructions: </h3>
+        <ul>
+                <li>First choose your room planimetry style by clicking on the cube icon on the left(once you have selected a room, to change room style you need to refresh the webpage);</li>
+                <li>You can import some furniture models using the sofa icon on the left;</li>
+                <li>In the top right corner you can use the light bulb to manage lighting.</li>
+                <li>Use mouse wheel to zoom-in and out in the 3D view, and left-mouse clicked + mouse move to move the camera view. 
+                <li> You can also import only furniture to visualize it.</li>
+                <li>Double click on a furniture object and then <b>canc</b> to remove it from the view.</li>
+                <li>When you want to move an object double click on it, a sound will be reproduced.</li>
+        </ul>
+        <h3>Commands for moving furniture:</h3>
+        <div class="svg">
+        <div class="svg-1"><img class="svg-img" src="img/keyboard/global.svg"></div>
+        <div class="svg-2">
+                <p>Use <b>w</b> and <b>s</b> to move along z axis.</p>
+                <p>Use <b>a</b> and <b>d</b> to move along x axis.</p>
+                <hr>
+                <p>Use <b>z</b> and <b>x</b> to scale the object.</p>
+                <hr>
+                <p>Use <b>q</b> and <b>e</b> to rotate the object along y axis.</p>
+                <hr>
+                <p>Use <b>u</b> and <b>i</b> to move along y axis.</p>
+        </div>
+</div>
+</div>
 
 <script  id="vertex-shader-3d" type="x-shader/x-vertex">
 attribute vec4 a_position;
@@ -116,17 +142,27 @@ var lightsMenu = document.getElementById("lights-menu");
 // Get the <span> element that closes the modal
 var span = document.getElementsByClassName("open")[0];
 
-// When the user clicks on <span> (x), close the modal
 span.onclick = function() {
   lightsMenu.style.display = "block";
 }
-// Get the <span> element that closes the modal
 close = document.getElementById("close");
-// When the user clicks on <span> (x), close the modal
+
 close.onclick = function() {
   lightsMenu.style.display = "none";
 }
-</script>
+var buttonInfo = document.getElementById("general-info");
+var legend = document.getElementById("legend");
+var closeLegend = document.getElementById("close-legend");
 
+buttonInfo.onclick = function() {
+        legend.style.display = "block";
+}
+
+closeLegend.onclick = function() {
+        legend.style.display = "none";
+}
+
+
+</script>
 </body>
 </html>
