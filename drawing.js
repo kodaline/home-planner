@@ -656,17 +656,18 @@ function drawObjects(shaderProgramNumber) {
         loadedObjects.forEach((todraw) => {
             viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
 
-            //Used to scale the object with "z-x"
-            viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeScaleMatrix(todraw.currentScale));
-
             //Used to rotate object around its center using "q-e"
             if (todraw.currentRotation){
-                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2, 0, +todraw.z/2));
+                    debugger;
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2 + todraw.originX + todraw.currentMoveX, 0, +todraw.z/2 + todraw.originZ + todraw.currentMoveZ));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, (utils.MakeRotateYMatrix(todraw.currentRotation)));
-                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2, 0, -todraw.z/2));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2 - todraw.originX - todraw.currentMoveX, 0, -todraw.z/2 - todraw.originZ - todraw.currentMoveZ));
             }
             //Used to move object using "w-a-s-d-u-i" 
             viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.currentMoveX, todraw.currentMoveY, todraw.currentMoveZ));
+            //Used to scale the object with "z-x"
+            viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeScaleMatrix(todraw.currentScale));
+
 		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
 
             for(i=0; i < todraw.sceneObjects; i++){

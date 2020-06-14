@@ -1,4 +1,4 @@
-# Blender MTL File: 'new_grid.blend'
+# Blender MTL File: 'None'
 # Material Count: 4
 
 newmtl room_1_3
@@ -10,7 +10,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd rect_room_room_1_3.jpeg
+map_Kd square_room_room_1_3.jpeg
 
 newmtl wall_2_4
 Ns 1.000002
@@ -21,7 +21,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd rect_room_wall_2_4.jpeg
+map_Kd square_room_wall_2_4.jpeg
 
 newmtl wall_2_5
 Ns 1.000002
@@ -32,7 +32,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd rect_room_wall_2_5.jpeg
+map_Kd square_room_wall_2_5.jpeg
 
 newmtl white
 Ns 1.000002
