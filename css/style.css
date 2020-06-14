@@ -6,7 +6,8 @@ html, body {
 
 .largefont {
     bottom: 80%;
-    margin: 5px;
+    margin: 0.1em;
+    padding: 1em;
     color: #404040;
     text-align: center;
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
@@ -28,8 +29,8 @@ body {
 .pane-nav {
     top: 60%;
 	position: absolute;
-    margin: 3px;
-    padding: 5px;
+    margin: 0.1em;
+    padding: 1em;
     background-color: #ffffff;
 	text-align: center;
     border-radius: 4px;
