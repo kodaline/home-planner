@@ -28,14 +28,12 @@ body {
 
 .pane-nav {
     top: 60%;
-	position: absolute;
     margin: 0.1em;
     padding: 1em;
     background-color: #ffffff;
 	text-align: center;
     border-radius: 4px;
     -webkit-font-smoothing: subpixel-antialiased;
-    transform: translate(0, -50%);
     border: 1px solid #dee5e8;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
 }
