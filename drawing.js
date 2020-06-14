@@ -83,7 +83,6 @@ var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
 	'Pianta quadrata': {location: 'empty_room/square_room.json', type: room}, 
     'Pianta a L': {location: 'empty_room/room_elle.json', type: room}, 
-    'Pianta semi-esagonale': {location: 'empty_room/room_esa.json', type: room}, 
     'Letto': {location: 'bed/bed.json', type: furniture},
     'Guardaroba': {location: 'wardrobe/wardrobe.json', type: furniture},
     'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
@@ -888,8 +887,7 @@ function read_prop(obj, prop) {
                 obj.find('.list')[0].innerHTML = '\
 		<li>Pianta rettangolare</li>\
 		<li>Pianta quadrata</li>\
-		<li>Pianta a L</li>\
-		<li>Pianta semi-esagonale</li>'
+		<li>Pianta a L</li>'
             }
             else if (self.name == "furniture") {
                 obj.find('.list')[0].innerHTML = '\

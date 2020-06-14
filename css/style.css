@@ -150,8 +150,8 @@ a:active {color:#0000FF;}  /* Selected link   */
     background: #404040;
     font-family: "Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace;
     color: #ffffff !important;
-    padding:0.5em;
-    margin: 0.5em;
+    padding:1em;
+    margin: 1em;
     text-decoration: none;
     text-align: center;
     text-transform: uppercase;
