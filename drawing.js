@@ -83,8 +83,9 @@ var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
 	'Pianta quadrata': {location: 'empty_room/square_room.json', type: room}, 
     'Pianta a L': {location: 'empty_room/room_elle.json', type: room}, 
-    'Letto': {location: 'bed/bed.json', type: furniture},
-    'Guardaroba': {location: 'wardrobe/wardrobe.json', type: furniture},
+    'Bed': {location: 'bed/bed.json', type: furniture},
+    'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture},
+    'Sideboard': {location: 'sideboard/sideboard.json', type: furniture},
     'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
     'Sofa': {location: 'sofa/sofa.json', type: furniture},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
@@ -891,8 +892,9 @@ function read_prop(obj, prop) {
             }
             else if (self.name == "furniture") {
                 obj.find('.list')[0].innerHTML = '\
-		<li>Letto</li>\
-		<li>Guardaroba</li>\
+		<li>Bed</li>\
+		<li>Wardrobe</li>\
+		<li>Sideboard</li>\
 		<li>Tavolino</li>\
 		<li>Sofa</li>\
 		<li>Frigo</li>'
