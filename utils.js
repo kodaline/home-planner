@@ -479,6 +479,28 @@ invertMatrix3: function(m){
 
   		return out;
   	},
+        
+    scalarVector: function(v, s){
+        /* scalar product between vector [v] and scalar [s] */
+
+        var out = [s*v[0], s*v[1], s*v[2]];
+
+        return out;
+    },
+    dotVector: function(u, v){
+        /* dot product between vector [u] and vector [v] */
+
+        var out = u[0]*v[0] + u[1]*v[1] + u[2]*v[2];
+
+        return out;
+    },
+    subVector: function(u,v){
+        /* vector difference between [u] and [v] */
+
+        var out = [u[0] - v[0], u[1] - v[1], u[2] - v[2]];
+
+        return out;
+    },
   	normalizeVector3: function(v){
          /* cross product of vectors [u] and  [v] */
           var len = Math.sqrt(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);
@@ -508,6 +530,30 @@ invertMatrix3: function(m){
   		return out;
   	},
 
+    makeAxisX: function(a) {
+    // Create vector for X axis orientation 
+        var adeg = this.degToRad(a);
+  	    var c = Math.cos(adeg);
+  	    var s = Math.sin(adeg);
+        var out = [c, 0.0, -s];
+        return out;
+    },
+    makeAxisY: function(a) {
+    // Create vector for Y axis orientation 
+        var adeg = this.degToRad(a);
+  	    var c = Math.cos(adeg);
+  	    var s = Math.sin(adeg);
+        var out = [0.0, 1.0, 0.0];
+        return out;
+    },
+    makeAxisZ: function(a) {
+    // Create vector for Z axis orientation 
+        var adeg = this.degToRad(a);
+  	    var c = Math.cos(adeg);
+  	    var s = Math.sin(adeg);
+        var out = [s, 0.0, c];
+        return out;
+    },
   	MakeRotateXMatrix: function(a) {
   	// Create a transform matrix for a rotation of {a} along the X axis.
 

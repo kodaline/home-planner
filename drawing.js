@@ -225,17 +225,32 @@ function onKeyDown(event) {
         }
 
         //rebuild object position/dimension for collision check
-        //TODO: add rotation support
-        var objectVars = {
-            originX: currentControlledObject.originX + newPosition.currentMoveX,
-            originY: currentControlledObject.originY + newPosition.currentMoveY,
-            originZ: currentControlledObject.originZ + newPosition.currentMoveZ,
-            x: currentControlledObject.x * newPosition.currentScale,
-            y: currentControlledObject.y * newPosition.currentScale,
-            z: currentControlledObject.z * newPosition.currentScale,
-        }
+        //TODO: delete following lines
+        //var objectB = {
+        //    originX: currentControlledObject.originX + newPosition.currentMoveX,
+        //    originY: currentControlledObject.originY + newPosition.currentMoveY,
+        //    originZ: currentControlledObject.originZ + newPosition.currentMoveZ,
+        //    x: currentControlledObject.x * newPosition.currentScale,
+        //    y: currentControlledObject.y * newPosition.currentScale,
+        //    z: currentControlledObject.z * newPosition.currentScale,
+        //}
 
-        if (!checkCollision(currentControlledObject.u_id, objectVars)){
+        objectB = {
+			AxisX: utils.makeAxisX(newPosition.currentRotation),
+			AxisY: utils.makeAxisY(newPosition.currentRotation),
+			AxisZ: utils.makeAxisZ(newPosition.currentRotation),
+            Pos: [
+                currentControlledObject.originX + newPosition.currentMoveX +  0.5 * currentControlledObject.x * newPosition.currentScale,
+				currentControlledObject.originY + newPosition.currentMoveY + 0.5 * currentControlledObject.y * newPosition.currentScale,
+            	currentControlledObject.originZ + newPosition.currentMoveZ + 0.5 * currentControlledObject.z * newPosition.currentScale
+            ],
+            Half_size: {
+            	x: 0.5 * currentControlledObject.x * newPosition.currentScale,
+            	y: 0.5 * currentControlledObject.y * newPosition.currentScale,
+            	z: 0.5 * currentControlledObject.z * newPosition.currentScale,
+			}
+        }
+        if (!checkCollision(currentControlledObject.u_id, objectB)){
             //update currentControlledObject with new values
             Object.keys(newPosition).forEach(function(key) {
                 currentControlledObject[key] = newPosition[key];
@@ -1054,21 +1069,27 @@ function checkCollision(objectId, objectB) {
 
         for (i=0; i < loadedObjects.length; i++) { 
             //rebuild object position/dimension for collision check
+			
             objectA = {
+				AxisX: utils.makeAxisX(loadedObjects[i].currentRotation),
+				AxisY: utils.makeAxisY(loadedObjects[i].currentRotation),
+				AxisZ: utils.makeAxisZ(loadedObjects[i].currentRotation),
                 u_id: loadedObjects[i].u_id,
                 isRoom: loadedObjects[i].isRoom,
-                originX: loadedObjects[i].originX + loadedObjects[i].currentMoveX,
-                originY: loadedObjects[i].originY + loadedObjects[i].currentMoveY,
-                originZ: loadedObjects[i].originZ + loadedObjects[i].currentMoveZ,
-                x: loadedObjects[i].x * loadedObjects[i].currentScale,
-                y: loadedObjects[i].y * loadedObjects[i].currentScale,
-                z: loadedObjects[i].z * loadedObjects[i].currentScale,
+                Pos: [
+                    loadedObjects[i].originX + loadedObjects[i].currentMoveX + 0.5 * loadedObjects[i].x * loadedObjects[i].currentScale,
+					loadedObjects[i].originY + loadedObjects[i].currentMoveY + 0.5 * loadedObjects[i].y * loadedObjects[i].currentScale,
+                	loadedObjects[i].originZ + loadedObjects[i].currentMoveZ + 0.5 * loadedObjects[i].z * loadedObjects[i].currentScale
+                ],
+                Half_size: {
+                	x: 0.5 * loadedObjects[i].x * loadedObjects[i].currentScale,
+                	y: 0.5 * loadedObjects[i].y * loadedObjects[i].currentScale,
+                	z: 0.5 * loadedObjects[i].z * loadedObjects[i].currentScale,
+				}
             }
             if (objectA.u_id != objectId && 
-                !objectA.isRoom &&
-                (objectA.originX + objectA.x >= objectB.originX) && (objectB.originX + objectB.x >= objectA.originX) &&
-                (objectA.originY + objectA.y >= objectB.originY) && (objectB.originY + objectB.y >= objectA.originY) &&
-                (objectA.originZ + objectA.z >= objectB.originZ) && (objectB.originZ + objectB.z >= objectA.originZ)) return true;
+                !objectA.isRoom && getCollision(objectA, objectB))
+				 return true;
         }
         return false;
 }
@@ -1147,4 +1168,40 @@ function updateAmbientLightColor(val){
     ambientLightColor[3] = 1.0;
 
 }
+
+// check if there's a separating plane in between the selected axes
+function getSeparatingPlane(RPos, Plane, box1, box2)
+{
+    return (Math.abs(utils.dotVector(RPos, Plane)) > 
+       (Math.abs(utils.dotVector(utils.scalarVector(box1.AxisX, box1.Half_size.x), Plane)) +
+        Math.abs(utils.dotVector(utils.scalarVector(box1.AxisY, box1.Half_size.y), Plane)) +
+        Math.abs(utils.dotVector(utils.scalarVector(box1.AxisZ, box1.Half_size.z), Plane)) +
+        Math.abs(utils.dotVector(utils.scalarVector(box2.AxisX, box2.Half_size.x), Plane)) + 
+        Math.abs(utils.dotVector(utils.scalarVector(box2.AxisY, box2.Half_size.y), Plane)) +
+        Math.abs(utils.dotVector(utils.scalarVector(box2.AxisZ, box2.Half_size.z), Plane))));
+}
+
+// test for separating planes in all 15 axes
+function getCollision(box1, box2)
+{
+    var RPos;
+    RPos = utils.subVector(box2.Pos, box1.Pos);
+
+    return !(getSeparatingPlane(RPos, box1.AxisX, box1, box2) ||
+        getSeparatingPlane(RPos, box1.AxisY, box1, box2) ||
+        getSeparatingPlane(RPos, box1.AxisZ, box1, box2) ||
+        getSeparatingPlane(RPos, box2.AxisX, box1, box2) ||
+        getSeparatingPlane(RPos, box2.AxisY, box1, box2) ||
+        getSeparatingPlane(RPos, box2.AxisZ, box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisX, box2.AxisX), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisX, box2.AxisY), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisX, box2.AxisZ), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisY, box2.AxisX), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisY, box2.AxisY), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisY, box2.AxisZ), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisZ, box2.AxisX), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisZ, box2.AxisY), box1, box2) ||
+        getSeparatingPlane(RPos,utils.crossVector(box1.AxisZ, box2.AxisZ), box1, box2));
+}
+
 
