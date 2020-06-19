@@ -86,8 +86,23 @@ var objectsList = {
     'Bed': {location: 'bed/bed.json', type: furniture},
     'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture},
     'Sideboard': {location: 'sideboard/sideboard.json', type: furniture},
-    'Tavolino': {location: 'table/tableBasse2.json', type: furniture},
+    'Coffee table': {location: 'coffee_table/coffee-table.json', type: furniture},
+    'Coffee table2': {location: 'coffee_table2/coffee-table2.json', type: furniture},
+    'Side table': {location: 'side_table/side-table.json', type: furniture},
+    'Table lamp': {location: 'table_lamp/table-lamp.json', type: furniture},
     'Sofa': {location: 'sofa/sofa.json', type: furniture},
+    'Sofa2': {location: 'sofa2/sofa2.json', type: furniture},
+    'Armchair': {location: 'relax_chair/relax-chair.json', type: furniture},
+    'Relax sofa': {location: 'relax_sofa/relax-sofa.json', type: furniture},
+    'TV stand': {location: 'tv_stand/stand-tv.json', type: furniture},
+    'TV': {location: 'tv/tv.json', type: furniture},
+    'Dining set': {location: 'dining_set/dining-set.json', type: furniture},
+    'Picture': {location: 'picture/picture.json', type: furniture},
+    'Canvas': {location: 'canvas/canvas.json', type: furniture},
+    'Office set': {location: 'office_set/office-set.json', type: furniture},
+    'Bookcase': {location: 'bookcase/bookcase.json', type: furniture},
+    'Bookcase empty': {location: 'bookcase_empty/bookcase-empty.json', type: furniture},
+    'Wall': {location: 'wall/wall.json', type: furniture},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
 
@@ -179,9 +194,9 @@ function playAudio(url) {
   new Audio(url).play();
 }
 
-var movementAlongAxis = 0.1;
+var movementAlongAxis = 0.075;
 var uniformScale = 0.1;
-var rotationAlongY = 30;
+var rotationAlongY = 15;
 
 function onKeyDown(event) {
     console.log(event.key);
@@ -218,7 +233,8 @@ function onKeyDown(event) {
         } else if (event.key == 'i') {
             newPosition.currentMoveY -= movementAlongAxis;
         } else if (event.key == 'Delete') {
-            loadedObjects.splice(loadedObjects.indexOf(currentControlledObject));
+                debugger;
+            loadedObjects.splice(loadedObjects.indexOf(currentControlledObject), 1);
             currentControlledObject = null;
             //avoid checking collision if deleted
             return;
@@ -673,7 +689,6 @@ function drawObjects(shaderProgramNumber) {
 
             //Used to rotate object around its center using "q-e"
             if (todraw.currentRotation){
-                    debugger;
                 viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2 + todraw.originX + todraw.currentMoveX, 0, +todraw.z/2 + todraw.originZ + todraw.currentMoveZ));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, (utils.MakeRotateYMatrix(todraw.currentRotation)));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2 - todraw.originX - todraw.currentMoveX, 0, -todraw.z/2 - todraw.originZ - todraw.currentMoveZ));
@@ -910,9 +925,23 @@ function read_prop(obj, prop) {
 		<li>Bed</li>\
 		<li>Wardrobe</li>\
 		<li>Sideboard</li>\
-		<li>Tavolino</li>\
 		<li>Sofa</li>\
-		<li>Frigo</li>'
+		<li>Sofa2</li>\
+		<li>Coffee table</li>\
+		<li>Coffee table2</li>\
+		<li>Side table</li>\
+		<li>Table lamp</li>\
+		<li>Relax sofa</li>\
+		<li>Armchair</li>\
+		<li>TV stand</li>\
+		<li>TV</li>\
+		<li>Dining set</li>\
+		<li>Picture</li>\
+		<li>Canvas</li>\
+		<li>Bookcase</li>\
+		<li>Bookcase empty</li>\
+		<li>Wall</li>\
+		<li>Office set</li>'
                 
             }
             else if (self.name == "description") {
