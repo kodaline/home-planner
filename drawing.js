@@ -74,35 +74,41 @@ var attachmentPoint;
 var room = 'room';
 var solid = 'solid';
 var furniture = 'furniture';
+var bedroom = 'bedroom';
+var living_room = "living room";
+var kitchen = 'kitchen';
+var office = 'office';
+var decor = 'decor';
+var tool = 'tool';
 var roomLoaded = false;
 var rotationMatrix = utils.MakeRotateYMatrix(0);
 var rotationMatrixHandle = new Array();
 var loadedObjects = new Array();
-//parameters for room mapping
+
 var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
 	'Pianta quadrata': {location: 'empty_room/square_room.json', type: room}, 
     'Pianta a L': {location: 'empty_room/room_elle.json', type: room}, 
-    'Bed': {location: 'bed/bed.json', type: furniture},
-    'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture},
-    'Sideboard': {location: 'sideboard/sideboard.json', type: furniture},
-    'Coffee table': {location: 'coffee_table/coffee-table.json', type: furniture},
-    'Coffee table2': {location: 'coffee_table2/coffee-table2.json', type: furniture},
-    'Side table': {location: 'side_table/side-table.json', type: furniture},
-    'Table lamp': {location: 'table_lamp/table-lamp.json', type: furniture},
-    'Sofa': {location: 'sofa/sofa.json', type: furniture},
-    'Sofa2': {location: 'sofa2/sofa2.json', type: furniture},
-    'Armchair': {location: 'relax_chair/relax-chair.json', type: furniture},
-    'Relax sofa': {location: 'relax_sofa/relax-sofa.json', type: furniture},
-    'TV stand': {location: 'tv_stand/stand-tv.json', type: furniture},
-    'TV': {location: 'tv/tv.json', type: furniture},
-    'Dining set': {location: 'dining_set/dining-set.json', type: furniture},
-    'Picture': {location: 'picture/picture.json', type: furniture},
-    'Canvas': {location: 'canvas/canvas.json', type: furniture},
-    'Office set': {location: 'office_set/office-set.json', type: furniture},
-    'Bookcase': {location: 'bookcase/bookcase.json', type: furniture},
-    'Bookcase empty': {location: 'bookcase_empty/bookcase-empty.json', type: furniture},
-    'Wall': {location: 'wall/wall.json', type: furniture},
+    'Bed': {location: 'bed/bed.json', type: furniture, place: bedroom},
+    'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture, place: bedroom},
+    'Sideboard': {location: 'sideboard/sideboard.json', type: furniture, place: bedroom},
+    'Coffee table': {location: 'coffee_table/coffee-table.json', type: furniture, place: living_room},
+    'Coffee table2': {location: 'coffee_table2/coffee-table2.json', type: furniture, place: living_room},
+    'Side table': {location: 'side_table/side-table.json', type: furniture, place: living_room},
+    'Table lamp': {location: 'table_lamp/table-lamp.json', type: furniture, place: living_room},
+    'Sofa': {location: 'sofa/sofa.json', type: furniture, place: living_room},
+    'Sofa2': {location: 'sofa2/sofa2.json', type: furniture, place: living_room},
+    'Armchair': {location: 'relax_chair/relax-chair.json', type: furniture, place: living_room},
+    'Relax sofa': {location: 'relax_sofa/relax-sofa.json', type: furniture, place: living_room},
+    'TV stand': {location: 'tv_stand/stand-tv.json', type: furniture, place: living_room},
+    'TV': {location: 'tv/tv.json', type: furniture, place: living_room},
+    'Dining set': {location: 'dining_set/dining-set.json', type: furniture, place: kitchen},
+    'Picture': {location: 'picture/picture.json', type: furniture, place: decor},
+    'Canvas': {location: 'canvas/canvas.json', type: furniture, place: decor},
+    'Office set': {location: 'office_set/office-set.json', type: furniture, place: office},
+    'Bookcase': {location: 'bookcase/bookcase.json', type: furniture, place: office},
+    'Bookcase empty': {location: 'bookcase_empty/bookcase-empty.json', type: furniture, place: office},
+    'Wall': {location: 'wall/wall.json', type: furniture, place: tool},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
 
@@ -349,10 +355,10 @@ function main(){
 
 function loadModel(modelName) {
 
-        if (!modelName) return; 
+        if (!modelName) return false;
 
         var objectCharacteristics = objectsList[modelName];
-        
+        if (!objectCharacteristics) return false; 
         var objectWorldMatrix = new Array();
         var projectionMatrix= new Array();
         var diffuseColor    = new Array();  //diffuse material colors of objs
@@ -574,6 +580,7 @@ function loadModel(modelName) {
             originZ: minVertZ,
         });
 
+        return true;
 }
   // Draw the scene.
   function drawSkyBox() {
@@ -895,11 +902,6 @@ function read_prop(obj, prop) {
 			var obj = $(this);
                 
 			obj.find('.field').click(function() { //onclick event, 'list' fadein
-            /**        
-            $.find('.list').forEach(function(e) 
-                    {
-                            $(e).fadeOut();
-                    });**/
             var self = $(this)[0];
             if (!submenuVisibility) {
 			    obj.find('.list').fadeIn(300);
@@ -922,9 +924,14 @@ function read_prop(obj, prop) {
             }
             else if (self.name == "furniture") {
                 obj.find('.list')[0].innerHTML = '\
+        <li onclick="openFurniture(1)">Bedroom</li>\
+		<ul id="bedroom" style="display:none">\
 		<li>Bed</li>\
 		<li>Wardrobe</li>\
 		<li>Sideboard</li>\
+		</ul>\
+        <li onclick="openFurniture(2)">Living room</li>\
+		<ul id="living-room" style="display:none">\
 		<li>Sofa</li>\
 		<li>Sofa2</li>\
 		<li>Coffee table</li>\
@@ -935,13 +942,22 @@ function read_prop(obj, prop) {
 		<li>Armchair</li>\
 		<li>TV stand</li>\
 		<li>TV</li>\
+		</ul>\
+        <li onclick="openFurniture(3)">Kitchen</li>\
+		<ul id="kitchen" style="display:none">\
 		<li>Dining set</li>\
+		</ul>\
+        <li onclick="openFurniture(4)">Decor</li>\
+		<ul id="decor" style="display:none">\
 		<li>Picture</li>\
 		<li>Canvas</li>\
+		</ul>\
+        <li onclick="openFurniture(5)">Office</li>\
+		<ul id="office" style="display:none">\
 		<li>Bookcase</li>\
 		<li>Bookcase empty</li>\
-		<li>Wall</li>\
-		<li>Office set</li>'
+		<li>Office set</li>\
+		</ul>'
                 
             }
             else if (self.name == "description") {
@@ -956,14 +972,40 @@ function read_prop(obj, prop) {
 			});
 			obj.find('.list li').click(function() { 
             var toLoad = $(this)[0].innerHTML;
-            loadModel(toLoad);
-			obj.find('.list').fadeOut(300);
-            submenuVisibility = false;
-			    });
+            if (loadModel(toLoad)){
+			    obj.find('.list').fadeOut(300);
+                submenuVisibility = false;
+                }
 			});
-		});
-	};
+	    });
+	});
+};
 })(jQuery);
+
+function openFurniture(roomStyle) {
+    if (roomStyle == 1) { 
+         
+        if (document.getElementById("bedroom").style.display == "block") document.getElementById("bedroom").style.display="none" 
+        else
+            document.getElementById("bedroom").style.display="block";}
+    else if (roomStyle == 2) {    
+        if (document.getElementById("living-room").style.display == "block") document.getElementById("living-room").style.display="none" 
+        else
+        document.getElementById("living-room").style.display="block";}
+    else if (roomStyle == 3) {    
+        if (document.getElementById("kitchen").style.display == "block") document.getElementById("kitchen").style.display="none" 
+        else
+        document.getElementById("kitchen").style.display="block";}
+    else if (roomStyle == 4) {    
+        if (document.getElementById("decor").style.display == "block") document.getElementById("decor").style.display="none" 
+        else
+        document.getElementById("decor").style.display="block";}
+    else if (roomStyle == 5) {    
+        if (document.getElementById("office").style.display == "block") document.getElementById("office").style.display="none" 
+        else
+        document.getElementById("office").style.display="block";}
+
+}
 
 $(function(){
 	$('.accordion').styleddropdown();
