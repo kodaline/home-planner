@@ -155,7 +155,7 @@ function doMouseUp(event) {
 
 var mouseX;
 var mouseY;
-
+var collisionDisabled = false;
 function doMouseMove(event) {
     if(mouseState) {
         var dx = event.pageX - lastMouseX;
@@ -200,7 +200,7 @@ function playAudio(url) {
   new Audio(url).play();
 }
 
-var movementAlongAxis = 0.075;
+var movementAlongAxis = 0.05;
 var uniformScale = 0.1;
 var rotationAlongY = 15;
 
@@ -246,25 +246,14 @@ function onKeyDown(event) {
             return;
         }
 
-        //rebuild object position/dimension for collision check
-        //TODO: delete following lines
-        //var objectB = {
-        //    originX: currentControlledObject.originX + newPosition.currentMoveX,
-        //    originY: currentControlledObject.originY + newPosition.currentMoveY,
-        //    originZ: currentControlledObject.originZ + newPosition.currentMoveZ,
-        //    x: currentControlledObject.x * newPosition.currentScale,
-        //    y: currentControlledObject.y * newPosition.currentScale,
-        //    z: currentControlledObject.z * newPosition.currentScale,
-        //}
-
         objectB = {
 			AxisX: utils.makeAxisX(newPosition.currentRotation),
 			AxisY: utils.makeAxisY(newPosition.currentRotation),
 			AxisZ: utils.makeAxisZ(newPosition.currentRotation),
             Pos: [
-                currentControlledObject.originX + newPosition.currentMoveX +  0.5 * currentControlledObject.x * newPosition.currentScale,
-				currentControlledObject.originY + newPosition.currentMoveY + 0.5 * currentControlledObject.y * newPosition.currentScale,
-            	currentControlledObject.originZ + newPosition.currentMoveZ + 0.5 * currentControlledObject.z * newPosition.currentScale
+                currentControlledObject.originX + newPosition.currentMoveX,
+				currentControlledObject.originY + newPosition.currentMoveY,
+            	currentControlledObject.originZ + newPosition.currentMoveZ,
             ],
             Half_size: {
             	x: 0.5 * currentControlledObject.x * newPosition.currentScale,
@@ -272,11 +261,18 @@ function onKeyDown(event) {
             	z: 0.5 * currentControlledObject.z * newPosition.currentScale,
 			}
         }
-        if (!checkCollision(currentControlledObject.u_id, objectB)){
-            //update currentControlledObject with new values
-            Object.keys(newPosition).forEach(function(key) {
-                currentControlledObject[key] = newPosition[key];
-            });
+        if (!collisionDisabled) {
+            if (!checkCollision(currentControlledObject.u_id, objectB)){
+                //update currentControlledObject with new values
+                Object.keys(newPosition).forEach(function(key) {
+                    currentControlledObject[key] = newPosition[key];
+                });
+            }
+        } else {
+
+                Object.keys(newPosition).forEach(function(key) {
+                    currentControlledObject[key] = newPosition[key];
+                });
         }
     }
 }
@@ -575,9 +571,9 @@ function loadModel(modelName) {
             x: maxVertX - minVertX,
             y: maxVertY - minVertY,
             z: maxVertZ - minVertZ,
-            originX: minVertX,
-            originY: minVertY,
-            originZ: minVertZ,
+            originX: (maxVertX + minVertX)/2.0,
+            originY: (maxVertY + minVertY)/2.0,
+            originZ: (maxVertZ + minVertZ)/2.0,
         });
 
         return true;
@@ -694,16 +690,22 @@ function drawObjects(shaderProgramNumber) {
         loadedObjects.forEach((todraw) => {
             viewMatrix = utils.MakeView(cx, cy, cz, elevation, -angle);
 
+            
+            //Used to scale the object with "z-x"
+            if (todraw.currentScale != 1) {
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.originX + todraw.currentMoveX, todraw.originY + todraw.currentMoveY, todraw.originZ + todraw.currentMoveZ));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeScaleMatrix(todraw.currentScale));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.originX - todraw.currentMoveX, -todraw.originY - todraw.currentMoveY, -todraw.originZ - todraw.currentMoveZ));
+            }
             //Used to rotate object around its center using "q-e"
             if (todraw.currentRotation){
-                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(+todraw.x/2 + todraw.originX + todraw.currentMoveX, 0, +todraw.z/2 + todraw.originZ + todraw.currentMoveZ));
+                    debugger;
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.originX + todraw.currentMoveX, 0, todraw.originZ + todraw.currentMoveZ));
                 viewMatrix = utils.multiplyMatrices(viewMatrix, (utils.MakeRotateYMatrix(todraw.currentRotation)));
-                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(-todraw.x/2 - todraw.originX - todraw.currentMoveX, 0, -todraw.z/2 - todraw.originZ - todraw.currentMoveZ));
+                viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix( -todraw.originX - todraw.currentMoveX, 0, -todraw.originZ - todraw.currentMoveZ));
             }
             //Used to move object using "w-a-s-d-u-i" 
             viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeTranslateMatrix(todraw.currentMoveX, todraw.currentMoveY, todraw.currentMoveZ));
-            //Used to scale the object with "z-x"
-            viewMatrix = utils.multiplyMatrices(viewMatrix, utils.MakeScaleMatrix(todraw.currentScale));
 
 		    projectionMatrix = utils.multiplyMatrices(perspectiveMatrix, viewMatrix);
 
@@ -1016,11 +1018,22 @@ function topView() {
      elevation = -90.0;
 }
 
-function virtualVisitor() {
+function resetView() {
         elevation = -25;
         angle = -15;
 }
 
+function disableCollision() {
+        if (collisionDisabled == false) {
+                collisionDisabled = true;
+                document.getElementById("disable-collision").innerHTML = "enable collision";
+                }
+        else if (collisionDisabled == true) {
+                collisionDisabled = false;
+                document.getElementById("disable-collision").innerHTML = "disable collision";
+        }
+
+}
 // Fill the buffer with the values that define a quad.
 function setGeometry(gl) {
   var positions = new Float32Array(
@@ -1140,6 +1153,7 @@ function checkCollision(objectId, objectB) {
 
         for (i=0; i < loadedObjects.length; i++) { 
             //rebuild object position/dimension for collision check
+               
 			
             objectA = {
 				AxisX: utils.makeAxisX(loadedObjects[i].currentRotation),
@@ -1148,9 +1162,9 @@ function checkCollision(objectId, objectB) {
                 u_id: loadedObjects[i].u_id,
                 isRoom: loadedObjects[i].isRoom,
                 Pos: [
-                    loadedObjects[i].originX + loadedObjects[i].currentMoveX + 0.5 * loadedObjects[i].x * loadedObjects[i].currentScale,
-					loadedObjects[i].originY + loadedObjects[i].currentMoveY + 0.5 * loadedObjects[i].y * loadedObjects[i].currentScale,
-                	loadedObjects[i].originZ + loadedObjects[i].currentMoveZ + 0.5 * loadedObjects[i].z * loadedObjects[i].currentScale
+                    loadedObjects[i].originX + loadedObjects[i].currentMoveX,
+					loadedObjects[i].originY + loadedObjects[i].currentMoveY,
+                	loadedObjects[i].originZ + loadedObjects[i].currentMoveZ,
                 ],
                 Half_size: {
                 	x: 0.5 * loadedObjects[i].x * loadedObjects[i].currentScale,
