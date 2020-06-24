@@ -1,0 +1,24 @@
+# Blender MTL File: 'None'
+# Material Count: 2
+
+newmtl coffee_machine_1
+Ns 20.000005
+Ka 0.200000 0.200000 0.200000
+Kd 1.000000 1.000000 1.000000
+Ks 0.156250 0.156250 0.156250
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 3
+map_Kd coffee-machine_coffee_machine_1.png
+
+newmtl coffee_machine_2749_3
+Ns 1.000002
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.007812 0.007812 0.007812
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd coffee-machine_coffee_machine_2749_3.jpeg

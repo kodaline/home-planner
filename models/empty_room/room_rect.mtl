@@ -1,7 +1,7 @@
 # Blender MTL File: 'None'
-# Material Count: 4
+# Material Count: 3
 
-newmtl room_1_4
+newmtl room_1_1
 Ns 1.000002
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -10,9 +10,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd room_rect_room_1_4.jpeg
+map_Kd room_rect_room_1_1.jpeg
 
-newmtl wall_2_5
+newmtl wall_2_2
 Ns 1.000002
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -21,9 +21,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd room_rect_wall_2_5.jpeg
+map_Kd room_rect_wall_2_2.jpeg
 
-newmtl wall_2_6
+newmtl wall_2_3
 Ns 1.000002
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -32,14 +32,4 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.000000
 d 1.000000
 illum 1
-map_Kd room_rect_wall_2_6.jpeg
-
-newmtl white
-Ns 1.000002
-Ka 1.000000 1.000000 1.000000
-Kd 0.976471 0.976471 0.972549
-Ks 0.000000 0.000000 0.000000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 1
+map_Kd room_rect_wall_2_3.jpeg

@@ -1,8 +1,13 @@
 var canvas, checkbox;
 var gl = null;
-modelsDir = "http://0.0.0.0:8000/models/";
-shaderDir = "http://0.0.0.0:8000/shaders/";
-baseDir = "http://0.0.0.0:8000/";
+
+var base_url = window.location.origin;
+var host = window.location.host;
+var pathArray = window.location.pathname.split( '/' );
+
+baseDir = window.location.origin;
+modelsDir = baseDir + "/models/";
+shaderDir = baseDir + "/shaders/";
 var vU = [];
 var shaderProgram = new Array(2); //Two handles, one for each shaders' couple. 0 = goureaud; 1 = phong
 
@@ -75,6 +80,7 @@ var room = 'room';
 var solid = 'solid';
 var furniture = 'furniture';
 var bedroom = 'bedroom';
+var childroom = 'childroom';
 var living_room = "living room";
 var kitchen = 'kitchen';
 var office = 'office';
@@ -92,6 +98,10 @@ var objectsList = {
     'Bed': {location: 'bed/bed.json', type: furniture, place: bedroom},
     'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture, place: bedroom},
     'Sideboard': {location: 'sideboard/sideboard.json', type: furniture, place: bedroom},
+    'Child bed': {location: 'child_bed/child-bed.json', type: furniture, place: childroom},
+    'Shelf double': {location: 'shelf/shelf.json', type: furniture, place: childroom},
+    'Shelf type1': {location: 'shelf3/shelf3.json', type: furniture, place: childroom},
+    'Shelf type2': {location: 'shelf2/shelf2.json', type: furniture, place: childroom},
     'Coffee table': {location: 'coffee_table/coffee-table.json', type: furniture, place: living_room},
     'Coffee table2': {location: 'coffee_table2/coffee-table2.json', type: furniture, place: living_room},
     'Side table': {location: 'side_table/side-table.json', type: furniture, place: living_room},
@@ -102,12 +112,32 @@ var objectsList = {
     'Relax sofa': {location: 'relax_sofa/relax-sofa.json', type: furniture, place: living_room},
     'TV stand': {location: 'tv_stand/stand-tv.json', type: furniture, place: living_room},
     'TV': {location: 'tv/tv.json', type: furniture, place: living_room},
+    'Wash basin': {location: 'wash_basin/wash-basin.json', type: furniture, place: kitchen},
     'Dining set': {location: 'dining_set/dining-set.json', type: furniture, place: kitchen},
+    'Dining table': {location: 'dining_table/table-dining.json', type: furniture, place: kitchen},
+    'Modern chair': {location: 'modern_chair/modern-chair.json', type: furniture, place: kitchen},
+    'Dresser': {location: 'dresser/dresser.json', type: furniture, place: kitchen},
+    'Fridge': {location: 'fridge/fridge.json', type: furniture, place: kitchen},
+    'Lower cabinet': {location: 'lower_cabinet/lower-cabinet.json', type: furniture, place: kitchen},
+    'Cooker': {location: 'cooker/cooker.json', type: furniture, place: kitchen},
+    'Vent': {location: 'vent/vent.json', type: furniture, place: kitchen},
+    'Coffee machine': {location: 'coffee_machine/coffee-machine.json', type: furniture, place: kitchen},
+    'Coffee chair': {location: 'coffee_chair/coffee-chair.json', type: furniture, place: kitchen},
+    'High coffee table': {location: 'high_coffee_table/high-co-table.json', type: furniture, place: kitchen},
+    'Tea set': {location: 'tea_set/tea-set.json', type: furniture, place: kitchen},
+    'Bar stool': {location: 'bar_stool/bar-stool.json', type: furniture, place: kitchen},
+    'Isle cabinet': {location: 'isle/isle.json', type: furniture, place: kitchen},
     'Picture': {location: 'picture/picture.json', type: furniture, place: decor},
-    'Canvas': {location: 'canvas/canvas.json', type: furniture, place: decor},
     'Office set': {location: 'office_set/office-set.json', type: furniture, place: office},
     'Bookcase': {location: 'bookcase/bookcase.json', type: furniture, place: office},
     'Bookcase empty': {location: 'bookcase_empty/bookcase-empty.json', type: furniture, place: office},
+    'PC': {location: 'pc/pc.json', type: furniture, place:office},
+    'iMac pc': {location: 'imac_pc/pc-imac.json', type: furniture, place:office},
+    'Angled desk': {location: 'angled_desk/angled-desk.json', type: furniture, place:office},
+    'Ikea desk-bookcase': {location: 'ikeabookcase_desk/ikea-bookcase-desk.json', type: furniture, place:office},
+    'Office chair': {location: 'office_chair/office-chair.json', type: furniture, place:office},
+    'Notebook set': {location: 'notebook_set/notebook-set.json', type: furniture, place:office},
+
     'Wall': {location: 'wall/wall.json', type: furniture, place: tool},
     'Plane': {location: 'plane/new_grid.json', type: solid, currentMoveY: -0.1},
 };
@@ -932,6 +962,13 @@ function read_prop(obj, prop) {
 		<li>Wardrobe</li>\
 		<li>Sideboard</li>\
 		</ul>\
+        <li onclick="openFurniture(6)">Childroom</li>\
+		<ul id="childroom" style="display:none">\
+		<li>Child bed</li>\
+		<li>Shelf double</li>\
+		<li>Shelf type1</li>\
+		<li>Shelf type2</li>\
+		</ul>\
         <li onclick="openFurniture(2)">Living room</li>\
 		<ul id="living-room" style="display:none">\
 		<li>Sofa</li>\
@@ -948,16 +985,35 @@ function read_prop(obj, prop) {
         <li onclick="openFurniture(3)">Kitchen</li>\
 		<ul id="kitchen" style="display:none">\
 		<li>Dining set</li>\
+		<li>Dining table</li>\
+		<li>Dresser</li>\
+		<li>Fridge</li>\
+		<li>Lower cabinet</li>\
+		<li>Coffee machine</li>\
+		<li>High coffee table</li>\
+		<li>Coffee chair</li>\
+		<li>Bar stool</li>\
+		<li>Wash basin</li>\
+		<li>Isle cabinet</li>\
+		<li>Cooker</li>\
+		<li>Vent</li>\
+		<li>Tea set</li>\
+		<li>Modern chair</li>\
 		</ul>\
         <li onclick="openFurniture(4)">Decor</li>\
 		<ul id="decor" style="display:none">\
 		<li>Picture</li>\
-		<li>Canvas</li>\
 		</ul>\
         <li onclick="openFurniture(5)">Office</li>\
 		<ul id="office" style="display:none">\
 		<li>Bookcase</li>\
 		<li>Bookcase empty</li>\
+		<li>PC</li>\
+		<li>iMac pc</li>\
+		<li>Angled desk</li>\
+		<li>Ikea desk-bookcase</li>\
+		<li>Office chair</li>\
+		<li>Notebook set</li>\
 		<li>Office set</li>\
 		</ul>'
                 
@@ -1006,6 +1062,10 @@ function openFurniture(roomStyle) {
         if (document.getElementById("office").style.display == "block") document.getElementById("office").style.display="none" 
         else
         document.getElementById("office").style.display="block";}
+    else if (roomStyle == 6) {    
+        if (document.getElementById("childroom").style.display == "block") document.getElementById("childroom").style.display="none" 
+        else
+        document.getElementById("childroom").style.display="block";}
 
 }
 
