@@ -99,6 +99,13 @@ var objectsList = {
     'Wardrobe': {location: 'wardrobe/wardrobe.json', type: furniture, place: bedroom},
     'Sideboard': {location: 'sideboard/sideboard.json', type: furniture, place: bedroom},
     'Child bed': {location: 'child_bed/child-bed.json', type: furniture, place: childroom},
+    'Baby bed': {location: 'baby_bed/baby-bed.json', type: furniture, place: childroom},
+    'Changing table': {location: 'changing_table/changing-table.json', type: furniture, place: childroom},
+    'Child desk': {location: 'child_desk/child-desk.json', type: furniture, place: childroom},
+    'Child desk 2': {location: 'child_desk_second/child-desk-second.json', type: furniture, place: childroom},
+    'Toy xylophone': {location: 'xylophone/xylophone.json', type: furniture, place: childroom},
+    'Toy train': {location: 'toy_train/toy-train.json', type: furniture, place: childroom},
+    'Toy letter cubes': {location: 'letter_cubes/letter-cubes.json', type: furniture, place: childroom},
     'Shelf double': {location: 'shelf/shelf.json', type: furniture, place: childroom},
     'Shelf type1': {location: 'shelf3/shelf3.json', type: furniture, place: childroom},
     'Shelf type2': {location: 'shelf2/shelf2.json', type: furniture, place: childroom},
@@ -128,6 +135,7 @@ var objectsList = {
     'Bar stool': {location: 'bar_stool/bar-stool.json', type: furniture, place: kitchen},
     'Isle cabinet': {location: 'isle/isle.json', type: furniture, place: kitchen},
     'Picture': {location: 'picture/picture.json', type: furniture, place: decor},
+    'Car model': {location: 'car_decor/car-decor.json', type: furniture, place: decor},
     'Office set': {location: 'office_set/office-set.json', type: furniture, place: office},
     'Bookcase': {location: 'bookcase/bookcase.json', type: furniture, place: office},
     'Bookcase empty': {location: 'bookcase_empty/bookcase-empty.json', type: furniture, place: office},
@@ -965,9 +973,16 @@ function read_prop(obj, prop) {
         <li onclick="openFurniture(6)">Childroom</li>\
 		<ul id="childroom" style="display:none">\
 		<li>Child bed</li>\
+		<li>Baby bed</li>\
+		<li>Changing table</li>\
 		<li>Shelf double</li>\
 		<li>Shelf type1</li>\
 		<li>Shelf type2</li>\
+		<li>Child desk</li>\
+		<li>Child desk 2</li>\
+		<li>Toy xylophone</li>\
+		<li>Toy train</li>\
+		<li>Toy letter cubes</li>\
 		</ul>\
         <li onclick="openFurniture(2)">Living room</li>\
 		<ul id="living-room" style="display:none">\
@@ -1003,6 +1018,7 @@ function read_prop(obj, prop) {
         <li onclick="openFurniture(4)">Decor</li>\
 		<ul id="decor" style="display:none">\
 		<li>Picture</li>\
+		<li>Car model</li>\
 		</ul>\
         <li onclick="openFurniture(5)">Office</li>\
 		<ul id="office" style="display:none">\

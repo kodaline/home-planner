@@ -1,29 +1,7 @@
 # Blender MTL File: 'None'
-# Material Count: 3
+# Material Count: 2
 
-newmtl Leg_feet
-Ns 1.000002
-Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
-Ks 0.007812 0.007812 0.007812
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd bar-stool_Leg_feet.jpeg
-
-newmtl Metal
-Ns 1.000002
-Ka 1.000000 1.000000 1.000000
-Kd 1.000000 1.000000 1.000000
-Ks 0.007812 0.007812 0.007812
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Kd bar-stool_Leg_feet.jpeg
-
-newmtl Plast
+newmtl Line59_1
 Ns 1.000002
 Ka 1.000000 1.000000 1.000000
 Kd 1.000000 1.000000 1.000000
@@ -32,4 +10,15 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
-map_Kd bar-stool_Plast.jpeg
+map_Kd bar-stool_Line59_1.png
+
+newmtl Line60_4
+Ns 1.000002
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Kd bar-stool_Line60_4.jpeg
