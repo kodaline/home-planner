@@ -5,11 +5,13 @@ var base_url = window.location.origin;
 var host = window.location.host;
 var pathArray = window.location.pathname.split( '/' );
 
+// Variables for the directories of models and shaders
 baseDir = window.location.origin;
 modelsDir = baseDir + "/models/";
 shaderDir = baseDir + "/shaders/";
-var vU = [];
-var shaderProgram = new Array(2); //Two handles, one for each shaders' couple. 0 = goureaud; 1 = phong
+
+// Two handles, one for each shaders' couple. 0 = goureaud; 1 = phong
+var shaderProgram = new Array(2); 
 
 //Parameters for Camera
 var cx = 0.0;
@@ -56,6 +58,7 @@ var currentShader = 0;                //Defines the current shader in use.
 var textureInfluence = 1.0;
 var ambientLightInfluence = 0.1;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
+
 //Parameters for light definition (directional light)
 var dirLightAlpha = -utils.degToRad(60);
 var dirLightBeta  = -utils.degToRad(120);
@@ -76,6 +79,8 @@ var matrixHandle;
 var positionHandle;
 var fb;
 var attachmentPoint;
+
+// Variables for object types
 var room = 'room';
 var solid = 'solid';
 var furniture = 'furniture';
@@ -91,6 +96,7 @@ var rotationMatrix = utils.MakeRotateYMatrix(0);
 var rotationMatrixHandle = new Array();
 var loadedObjects = new Array();
 
+// The set of objects of the project, with their type and location
 var objectsList = {
 	'Pianta rettangolare': {location: 'empty_room/room_rect.json', type: room}, 
 	'Pianta quadrata': {location: 'empty_room/square_room.json', type: room}, 
@@ -175,8 +181,8 @@ var lightColor = new Float32Array([1.0, 1.0, 1.0, 1.0]);
 var moveLight = 0; //0 : move the camera - 1 : Move the lights
 
 var currentControlledObject = null;
-// event handler
 
+// event handler
 var Tx = 0.0, Ty = 0.0, Tz = 0.0;
 var mouseState = false;
 var lastMouseX = -100, lastMouseY = -100;
@@ -321,13 +327,14 @@ function requestCORSIfNotSameOrigin(img, url) {
   }
 }
 
-
 var lastDownTarget;
 
+// Here the Main function begins
 function main(){
-
+    // Setup the webGL context
 	canvas = document.getElementById("my-canvas");
     checkbox = document.getElementById("chbx");
+    // Adding the event listeners
 	canvas.addEventListener("mousedown", doMouseDown, false);
     canvas.addEventListener("mouseup", doMouseUp, false);
     canvas.addEventListener("mousemove", doMouseMove, false);
@@ -340,6 +347,7 @@ function main(){
     fps_html_current = document.getElementById("display_fps");
 
     try{
+    //This will make any GL errors show up in your browser JavaScript console.
     gl = WebGLDebugUtils.makeDebugContext(canvas.getContext("webgl2"));
     gl = canvas.getContext("webgl2");
 
@@ -348,6 +356,7 @@ function main(){
     }
 
     if(gl){
+        // Get the gl canvas
         utils.resizeCanvasToDisplaySize(gl.canvas);
 		console.log(gl.canvas.width, gl.canvas.height);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -387,6 +396,7 @@ function main(){
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
   }
 
+// Here the function that loads models
 function loadModel(modelName) {
 
         if (!modelName) return false;
@@ -407,8 +417,6 @@ function loadModel(modelName) {
         var observerPositionObj = new Array();
         var lightDirectionObj = new Array();
         var lightPositionObj = new Array();
-
-
         var vertexBufferObjectId= new Array();
         var indexBufferObjectId = new Array();
 
@@ -426,7 +434,6 @@ function loadModel(modelName) {
 		console.log(sceneObjects);
         perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, nearPlane, farPlane);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
-
         vao = gl.createVertexArray();
         gl.bindVertexArray(vao);
         id = id + 1;
@@ -466,9 +473,7 @@ function loadModel(modelName) {
 
             //creating the objects' world matrix
             objectWorldMatrix[i] = roomModel.rootnode.children[i].transformation;      
-
             var meshMatIndex = roomModel.meshes[i].materialindex;
-      
             var UVFileNamePropertyIndex = -1;
             var diffuseColorPropertyIndex = -1;
             var specularColorPropertyIndex = -1;
@@ -521,29 +526,23 @@ function loadModel(modelName) {
             console.log("Face Number: "+facesNumber[i]);
 
 			if(UVFileNamePropertyIndex>=0){
-
                 nTexture[i]=true;
                 console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
                 imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
-				
                 imageName = objectCharacteristics.location.split('/')[0] + '/' + imageName;
 
-		        var getTexture = function(image_URL){                                                                                                                   
-                var image=new Image();          
+		        var getTexture = function(image_URL){                                                                                                               var image=new Image();          
                     image["webGLTexture"] = false;   
                     requestCORSIfNotSameOrigin(image, image_URL);                                                                                                           
 
                     image.onload=function(e) {                                                                                                                          
                         var texture=gl.createTexture();                                                                                                                 
-                                                        
                         gl.bindTexture(gl.TEXTURE_2D, texture);                                                                                                         
-                                                        
                         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
                         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);                                                                              
                         gl.generateMipmap(gl.TEXTURE_2D);                                                                                                               
-                                                        
                         gl.bindTexture(gl.TEXTURE_2D, null);
                         image["webGLTexture"] = texture; 
                    };
@@ -616,51 +615,8 @@ function loadModel(modelName) {
 
         return true;
 }
-  // Draw the scene.
-  function drawSkyBox() {
-    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
-    // Tell WebGL how to convert from clip space to pixels
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-    // Tell it to use our program (pair of shaders)
-    gl.useProgram(program);
-
-    // Turn on the position attribute
-    gl.enableVertexAttribArray(positionLocation);
-
-    // Bind the position buffer.
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-    var size = 2;          // 2 components per iteration
-    var type = gl.FLOAT;   // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    var offset = 0;        // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-        positionLocation, size, type, normalize, stride, offset);
-
-    
-    // Set the uniforms
-    gl.uniformMatrix4fv(
-        viewDirectionProjectionInverseLocation, false,
-        projectionMatrix);
-    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
-    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
-
-    // Tell the shader to use texture unit 0 for u_skybox
-    gl.uniform1i(skyboxLocation, 0);
-
-    // let our quad pass the depth test at 1.0
-    gl.depthFunc(gl.LEQUAL);
-
-    // Draw the geometry.
-    gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
-    gl.disableVertexAttribArray(positionLocation);
-  }
-
-
+// This is the function that draws the scene
 	function drawScene() {
 		now = Date.now();
     	elapsed = now - then;
@@ -678,7 +634,7 @@ function loadModel(modelName) {
             // specified fpsInterval not being a multiple of RAF's interval (16.7ms)
             then = now - (elapsed % fpsInterval);
 
-            // Put your drawing code here
+            // drawing code here
         
 		frame ++;	
         if (loadedObjects.length) {
@@ -853,7 +809,7 @@ function drawObjects(shaderProgramNumber) {
   }
 
 
-
+// Here is the function that loads the shaders
 function loadShaders(){
 
         utils.loadFiles([shaderDir + 'vs_p.glsl',
@@ -889,8 +845,7 @@ function loadShaders(){
                             }
 
                         });
-                //*** Getting the handles to the shaders' vars
-
+        //*** Getting the handles to the shaders' vars
         for(i = 0; i <2; i++){
 
 
@@ -936,6 +891,7 @@ function read_prop(obj, prop) {
     return obj[prop];
 }
 
+// Some JQuery for the menu models
 (function($){
 	$.fn.styleddropdown = function(){
 		return this.each(function(){
@@ -1110,19 +1066,7 @@ function disableCollision() {
         }
 
 }
-// Fill the buffer with the values that define a quad.
-function setGeometry(gl) {
-  var positions = new Float32Array(
-    [
-      -1, -1,
-       1, -1,
-      -1,  1,
-      -1,  1,
-       1, -1,
-       1,  1,
-    ]);
-  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-}
+
 
   function radToDeg(r) {
     return r * 180 / Math.PI;
@@ -1140,91 +1084,7 @@ var fieldOfViewRadians = degToRad(60);
 var cameraYRotationRadians = degToRad(0);
 var viewDirectionProjectionInverseLocation;
 
-function cubeMap() {
-  // look up where the vertex data needs to go.
-  program = webglUtils.createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
-
-  positionLocation = gl.getAttribLocation(program, "a_position");
-  ambLightColorSkybox = gl.getUniformLocation(program, "ambientLightColor");
-  ambLightInfluenceSkybox = gl.getUniformLocation(program, "ambientLightInfluence");
-
-  // lookup uniforms
-  skyboxLocation = gl.getUniformLocation(program, "u_skybox");
-  viewDirectionProjectionInverseLocation =
-      gl.getUniformLocation(program, "u_viewDirectionProjectionInverse");
-
-  // Create a buffer for positions
-  positionBuffer = gl.createBuffer();
-  // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  // Put the positions in the buffer
-  setGeometry(gl);
-
-  // Create a texture.
-  var texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-
-  const faceInfos = [
-    {
-      target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-      url: '/img/sky_posx1.png',
-    },
-    {
-      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-      url: '/img/sky_negx1.png',
-    },
-    {
-      target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-      url: '/img/sky_posy1.png',
-    },
-    {
-      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-      url: '/img/sky_negy1.png',
-    },
-    {
-      target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-      url: '/img/sky_posz1.png',
-    },
-    {
-      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-      url: '/img/sky_negz1.png',
-    },
-  ];
-  faceInfos.forEach((faceInfo) => {
-    const {target, url} = faceInfo;
-
-    // Upload the canvas to the cubemap face.
-    const level = 0;
-    const internalFormat = gl.RGBA;
-    const width = 1024;
-    const height = 1024;
-    const format = gl.RGBA;
-    const type = gl.UNSIGNED_BYTE;
-
-    // setup each face so it's immediately renderable
-    gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
-
-    // Asynchronously load an image
-    const image = new Image();
-    image.src = url;
-    image.addEventListener('load', function() {
-      // Now that the image has loaded make copy it to the texture.
-      gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
-      gl.texImage2D(target, level, internalFormat, format, type, image);
-	  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-	  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-    });
-  });
-  gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-
-}
-
-function generalUsageInfo() {
-
-}
-
+// Check collision function
 function checkCollision(objectId, objectB) {
 
         for (i=0; i < loadedObjects.length; i++) { 
@@ -1254,46 +1114,6 @@ function checkCollision(objectId, objectB) {
         }
         return false;
 }
-
-  // Draw the scene.
-  function drawPlane() {
-
-    // Tell it to use our program (pair of shaders)
-    gl.useProgram(program);
-
-    // Turn on the position attribute
-    gl.enableVertexAttribArray(positionLocation);
-
-    // Bind the position buffer.
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
-    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
-    var size = 2;          // 2 components per iteration
-    var type = gl.FLOAT;   // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
-    var offset = 0;        // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-        positionLocation, size, type, normalize, stride, offset);
-
-    
-    // Set the uniforms
-    gl.uniformMatrix4fv(
-        viewDirectionProjectionInverseLocation, false,
-        projectionMatrix);
-    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
-    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
-
-    // Tell the shader to use texture unit 0 for u_skybox
-    gl.uniform1i(skyboxLocation, 0);
-
-    // let our quad pass the depth test at 1.0
-    gl.depthFunc(gl.LEQUAL);
-
-    // Draw the geometry.
-    gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
-    gl.disableVertexAttribArray(positionLocation);
-  }
 
 //Called when the slider for texture influence is changed
 function updateTextureInfluence(val){
@@ -1365,4 +1185,163 @@ function getCollision(box1, box2)
         getSeparatingPlane(RPos,utils.crossVector(box1.AxisZ, box2.AxisZ), box1, box2));
 }
 
+/**
+  function drawPlane() {
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
+    // Turn on the position attribute
+    gl.enableVertexAttribArray(positionLocation);
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 2;          // 2 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+        positionLocation, size, type, normalize, stride, offset);
+    
+    // Set the uniforms
+    gl.uniformMatrix4fv(
+        viewDirectionProjectionInverseLocation, false,
+        projectionMatrix);
+    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
+    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
 
+    // Tell the shader to use texture unit 0 for u_skybox
+    gl.uniform1i(skyboxLocation, 0);
+
+    // let our quad pass the depth test at 1.0
+    gl.depthFunc(gl.LEQUAL);
+
+    // Draw the geometry.
+    gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
+    gl.disableVertexAttribArray(positionLocation);
+  }
+
+function cubeMap() {
+  // look up where the vertex data needs to go.
+  program = webglUtils.createProgramFromScripts(gl, ["vertex-shader-3d", "fragment-shader-3d"]);
+  positionLocation = gl.getAttribLocation(program, "a_position");
+  ambLightColorSkybox = gl.getUniformLocation(program, "ambientLightColor");
+  ambLightInfluenceSkybox = gl.getUniformLocation(program, "ambientLightInfluence");
+  // lookup uniforms
+  skyboxLocation = gl.getUniformLocation(program, "u_skybox");
+  viewDirectionProjectionInverseLocation =
+  gl.getUniformLocation(program, "u_viewDirectionProjectionInverse");
+  // Create a buffer for positions
+  positionBuffer = gl.createBuffer();
+  // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  // Put the positions in the buffer
+  setGeometry(gl);
+  // Create a texture.
+  var texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+  const faceInfos = [
+    {
+      target: gl.TEXTURE_CUBE_MAP_POSITIVE_X,
+      url: '/img/sky_posx1.png',
+    },
+    {
+      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
+      url: '/img/sky_negx1.png',
+    },
+    {
+      target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
+      url: '/img/sky_posy1.png',
+    },
+    {
+      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
+      url: '/img/sky_negy1.png',
+    },
+    {
+      target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
+      url: '/img/sky_posz1.png',
+    },
+    {
+      target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
+      url: '/img/sky_negz1.png',
+    },
+  ];
+  faceInfos.forEach((faceInfo) => {
+    const {target, url} = faceInfo;
+
+    // Upload the canvas to the cubemap face.
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 1024;
+    const height = 1024;
+    const format = gl.RGBA;
+    const type = gl.UNSIGNED_BYTE;
+
+    // setup each face so it's immediately renderable
+    gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, null);
+
+    // Asynchronously load an image
+    const image = new Image();
+    image.src = url;
+    image.addEventListener('load', function() {
+      // Now that the image has loaded make copy it to the texture.
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+      gl.texImage2D(target, level, internalFormat, format, type, image);
+	  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+	  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    });
+  });
+  gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+  gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+}
+
+// Fill the buffer with the values that define a quad.
+function setGeometry(gl) {
+  var positions = new Float32Array(
+    [
+      -1, -1,
+       1, -1,
+      -1,  1,
+      -1,  1,
+       1, -1,
+       1,  1,
+    ]);
+  gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+}
+
+// Draw the scene.
+  function drawSkyBox() {
+    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
+    // Tell WebGL how to convert from clip space to pixels
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
+    // Turn on the position attribute
+    gl.enableVertexAttribArray(positionLocation);
+    // Bind the position buffer.
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
+    var size = 2;          // 2 components per iteration
+    var type = gl.FLOAT;   // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0;        // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0;        // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+        positionLocation, size, type, normalize, stride, offset);
+    // Set the uniforms
+    gl.uniformMatrix4fv(
+        viewDirectionProjectionInverseLocation, false,
+        projectionMatrix);
+    gl.uniform4f(ambLightColorSkybox, ambientLightColor[0], ambientLightColor[1], ambientLightColor[2], ambientLightColor[3]);
+    gl.uniform1f(ambLightInfluenceSkybox, ambientLightInfluence);
+    // Tell the shader to use texture unit 0 for u_skybox
+    gl.uniform1i(skyboxLocation, 0);
+    // let our quad pass the depth test at 1.0
+    gl.depthFunc(gl.LEQUAL);
+    // Draw the geometry.
+    gl.drawArrays(gl.TRIANGLES, 0, 1 * 6);
+    gl.disableVertexAttribArray(positionLocation);
+  }
+**/

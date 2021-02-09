@@ -1,16 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-        <script src="lib/webgl-obj-loader.min.js"></script>
         <script src="lib/jquery-3.5.1.js"></script>
         <script src="parallel.js"></script>
         <script src="webgl-debug.js"></script>
-        <script src="webgl-utils-gregg.js"></script>
-        <script src="m4.js"></script>
-		<link rel='stylesheet' href='css/style.css'>
 		<link rel='stylesheet' href='css/style.css'>
         <script type="text/javascript" src="utils.js"></script>
-        <script type="text/javascript" src="help.js"></script>
         <script type="text/javascript" src="drawing.js"></script>
 		<script src="https://kit.fontawesome.com/7e8e0cf498.js" crossorigin="anonymous"></script>
 	</head>
@@ -62,11 +57,6 @@
                 <input type="radio" name="light" onchange="updateLightType(this.value);" value="4" > Spot <br/>
                 <input type="radio" name="light" id="nol" onchange="updateLightType(this.value);" value="5" > [NO Light] <br/>                                                  
             </form>
-            <p><b> Light Computation </b></p>
-            <form>
-                <input type="radio" name="type" onchange="updateShader(this.value);" value="1" > Per Vertex <br/>
-                <input type="radio" name="type" onchange="updateShader(this.value);" value="0" checked> Per Fragment <br/>                                                      
-            </form>         
             <p><b> Texture Influence </b></p>
             <div id="slider1"> 0                
                 <input id="slide1" type="range" min="0" max="1" step="0.05" value="1" onchange="updateTextureInfluence(this.value);"/> 1 <br/>                                   
@@ -79,9 +69,6 @@
                 <input id="colorPicker" type="color" value="#FFFFFF" onchange="updateAmbientLightColor(this.value);"/>
                 </p>
             </div>
-            
-            <p><b> Movement </b></p>        
-                <input type="checkbox" id="chbx" onclick="updateLightMovement();"/> Move Lights<br/>
             </td>
 </div>
             </div>
