@@ -8,20 +8,20 @@ uniform mat4 wvpMatrix;
 uniform vec4 mSpecColor;            
 uniform float mSpecPower;
 
-uniform vec3 lightDirection;
-uniform vec3 lightPosition;
-uniform vec4 lightColor;
-uniform int lightType;
+uniform vec3 lightDirection; //light direction
+uniform vec3 lightPosition; //light position
+uniform vec4 lightColor; //light color
+uniform int lightType; //light type
 
-uniform vec4 ambientLightColor;
-uniform float ambientLightInfluence;
+uniform vec4 ambientLightColor; //ambient light color
+uniform float ambientLightInfluence; //ambient influence
 
-uniform vec3 eyePosition;
+uniform vec3 eyePosition; //position of the eye (observer)
 
 varying vec2 fsUVs;
 varying vec2 fsUV2s;
 
-//We have to separate the components that require the texture from the others.
+//separation of the components that require the texture from the others
 varying vec4 goureaudSpecular;
 varying vec4 goureaudDiffuseAndAmbient;
 
@@ -35,6 +35,7 @@ vec4 lightModel(int lt, vec3 pos) {
 
 	lDim = 1.0;
 	
+    // if block to switch between light types (some are missing in the real app)
 	if(lt == 1) { 			//Directional light
 		nLightDir = - normalize(lightDirection);
 	} else if(lt == 2) {	//Point light
@@ -46,7 +47,7 @@ vec4 lightModel(int lt, vec3 pos) {
 	} else if(lt == 4) {	//Spot light
 		nLightDir = normalize(lightPosition - pos);
 		lCone = -dot(nLightDir, normalize(lightDirection));
-		if(lCone < 0.5) {
+		if(lCone < 0.3) {
 			lDim = 0.0;
 		} else if(lCone > 0.7) {
 			lDim = 1.0;
@@ -56,7 +57,6 @@ vec4 lightModel(int lt, vec3 pos) {
 	}
 	return vec4(nLightDir, lDim);
 }
-
 
 void main() { 
 
