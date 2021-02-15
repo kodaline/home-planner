@@ -128,6 +128,10 @@ function updateAmbientLightInfluence(val){
     ambientLightInfluence = val;
 }
 
+function updateEmitInfluence(val){
+    emitInfluence = val;
+}
+
 function updateAmbientLightColor(val){
 
     val = val.replace('#','');

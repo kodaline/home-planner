@@ -33,7 +33,7 @@ Maybe for the baby, an office for work or a place to meditate and relax.
 * Use q and e to rotate the object along y axis.
 * Use u and i to move along y axis.
 
-##ToDO list
+## ToDO list
 
 * Make the user import 3d models (correctly scaled and resized for the scene;
 * Insert the feature of selecting the textures for the furniture, and the room;
@@ -45,3 +45,4 @@ Maybe for the baby, an office for work or a place to meditate and relax.
 * Set a virtual tour visitor to allow the user with using w-a-s-d to go and look around as if he/she is in the scene;
 * Improve shaders to make realistic rendering;
 * Introduce shadows (even simple ones).
+* Add functionality with both Phong and Gouraud shading (by switching in between them).

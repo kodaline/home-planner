@@ -72,7 +72,10 @@
                 <p><b>  Ambient Light Color </b></p>
                 <p align="center">              
                 <input id="colorPicker" type="color" value="#FFFFFF" onchange="updateAmbientLightColor(this.value);"/>
-                </p>
+                </p> </div>
+            <p><b> Emission Influence </b></p>
+            <div id="slider1">  0               
+                <input id="slide2" type="range" min="0" max="1" step="0.1" value="0.1" onchange="updateEmitInfluence(this.value);"/> 1 <br/>                              
             </div>
             </td>
 </div>

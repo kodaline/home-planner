@@ -7,7 +7,9 @@ uniform float mSpecPower;
 uniform sampler2D textureFile;
 uniform float textureInfluence;
 uniform float ambientLightInfluence;
+uniform float emitInfluence;
 uniform vec4 ambientLightColor;
+uniform vec4 emitColor;
 
 uniform vec3 lightDirection;
 uniform vec3 lightPosition;
@@ -15,7 +17,6 @@ uniform vec4 lightColor;
 uniform int lightType;
 
 uniform vec3 eyePosition;
-
 varying vec3 fsNormal; 
 varying vec3 fsPosition; 
 varying vec2 fsUVs;
@@ -75,10 +76,10 @@ void main() {
 	float lightDimension = lm.a;
 	
 	//Computing the color contribution from the texture
-	vec4 diffuseTextureColorMixture = texture2D(textureFile, fsUVs) * textureInfluence + mDiffColor * (1.0 - textureInfluence) ;
+	vec4 diffuseTextureColorMixture = texture2D(textureFile, fsUVs) * textureInfluence + mDiffColor * (1.0 - textureInfluence);
 
 	//Computing the ambient light contribution
-	//We assume that the ambient color of the object is identical to it diffuse color (including its texture contribution)
+	//We assume that the ambient color of the object is identical to its diffuse color (including its texture contribution)
 	vec4 ambLight = diffuseTextureColorMixture * ambientLightColor * ambientLightInfluence;
 	
 	if(lightType == 5){
@@ -86,11 +87,13 @@ void main() {
 	}else{
 		//Computing the diffuse component of light 
 		vec4 diffuse = diffuseTextureColorMixture * lightColor * clamp(dot(nlightDirection, nNormal), 0.0, 1.0) * lightDimension;	
-		
+
+	    vec4 emit = emitColor * (1.0 - textureInfluence) + texture2D(textureFile, fsUVs) * textureInfluence * max(max(emitColor.r,emitColor.g),emitColor.b) * emitInfluence; 	
+
 		//Reflection vector for Phong model
 		vec3 reflection = -reflect(nlightDirection, nNormal);	
 		vec4 specular = mSpecColor * lightColor * pow(clamp(dot(reflection, nEyeDirection),0.0, 1.0), mSpecPower) * lightDimension;
-		gl_FragColor = min(ambLight + diffuse + specular, vec4(1.0, 1.0, 1.0, 1.0)); 		
+		gl_FragColor = min(ambLight + diffuse + specular + emit, vec4(1.0, 1.0, 1.0, 1.0)); 		
 	}
 	
 

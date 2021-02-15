@@ -31,7 +31,9 @@ var translation = new Array(2);
 //var ambLightInfluenceSkybox = new Array(2);
 //var ambLightColorSkybox = new Array(2);
 var ambientLightInfluenceHandle = new Array(2);
+var emitInfluenceHandle = new Array(2);
 var ambientLightColorHandle = new Array(2);
+var emissionColorHandle = new Array(2);
 var matrixPositionHandle = new Array(2);
 var materialDiffColorHandle = new Array(2);
 var lightDirectionHandle = new Array(2);
@@ -53,7 +55,9 @@ var currentLightType = 1; //current light type variable
 var currentShader = 0; //Defines the current shader in use
 var textureInfluence = 1.0;
 var ambientLightInfluence = 0.1;
+var emitInfluence = 0.1;
 var ambientLightColor = [1.0, 1.0, 1.0, 1.0];
+var emitColor = [0.533, 0.533, 0.533, 0.533];
 
 //Parameters for light definition (directional light)
 var dirLightAlpha = -utils.degToRad(60);
@@ -228,7 +232,7 @@ function loadModel(modelName) {
                 var y = objectModel.meshes[i].vertices[n*3+1];
                 var z = objectModel.meshes[i].vertices[n*3+2];
                 objVertex.push(x, y, z);
-
+                //these if's are used to determine how big the object is
                 if (x < minVertX)
                     minVertX = x;
                 if (x > maxVertX)
@@ -318,7 +322,7 @@ function loadModel(modelName) {
             currentRotation: 0,
             currentScale: 1,
             currentMoveZ: 0,
-            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY :  -minVertY,
+            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY :   -minVertY,
             currentMoveX: 0,
             x: maxVertX - minVertX,
             y: maxVertY - minVertY,
@@ -445,6 +449,7 @@ function drawObjects(shaderProgramNumber) {
             	    todraw.observerPositionObj[i] = utils.multiplyMatrix3Vector3(utils.invertMatrix3(utils.sub3x3from4x4(todraw.objectWorldMatrix[i])), eyeTemp);
     			    gl.uniform1f(textureInfluenceHandle[currentShader], textureInfluence);
     			    gl.uniform1f(ambientLightInfluenceHandle[currentShader], ambientLightInfluence);
+    			    gl.uniform1f(emitInfluenceHandle[currentShader], emitInfluence);
     			    
     			    gl.uniform1i(textureFileHandle[currentShader], 0);
                     if (todraw.nTexture[i] == true && read_prop(todraw.diffuseTextureObj[i], "webGLTexture")) {
@@ -471,6 +476,10 @@ function drawObjects(shaderProgramNumber) {
                                                                          ambientLightColor[1],
                                                                          ambientLightColor[2],
                                                                          ambientLightColor[3]);
+                    gl.uniform4f(emissionColorHandle[currentShader], emitColor[0],
+                                                                     emitColor[1],
+                                                                     emitColor[2],
+                                                                     emitColor[3]);
     
     			    gl.uniform3f(lightDirectionHandle[currentShader], todraw.lightDirectionObj[i][0],
                                                                       todraw.lightDirectionObj[i][1],
@@ -539,10 +548,10 @@ function drawObjects(shaderProgramNumber) {
  **/
 function loadShaders(){
 
-        utils.loadFiles([shaderDir + 'vs_g.glsl',
-                         shaderDir + 'fs_g.glsl',
-                         shaderDir + 'vs_p.glsl',
+        utils.loadFiles([shaderDir + 'vs_p.glsl',
                          shaderDir + 'fs_p.glsl',
+                         shaderDir + 'vs_g.glsl',
+                         shaderDir + 'fs_g.glsl',
                          shaderDir + 'pick-v.glsl',
                          shaderDir + 'pick-f.glsl'
                          ],
@@ -589,7 +598,9 @@ function loadShaders(){
             textureFileHandle[i] = gl.getUniformLocation(shaderProgram[i], 'textureFile');
             textureInfluenceHandle[i] = gl.getUniformLocation(shaderProgram[i], 'textureInfluence');
             ambientLightInfluenceHandle[i] = gl.getUniformLocation(shaderProgram[i], 'ambientLightInfluence');
+            emitInfluenceHandle[i] = gl.getUniformLocation(shaderProgram[i], 'emitInfluence');
             ambientLightColorHandle[i]= gl.getUniformLocation(shaderProgram[i], 'ambientLightColor');
+            emissionColorHandle[i]= gl.getUniformLocation(shaderProgram[i], 'emitColor');
 
             eyePositionHandle[i] = gl.getUniformLocation(shaderProgram[i], 'eyePosition');
 
