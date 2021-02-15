@@ -1,4 +1,12 @@
+/**
+ * The detection of collision is implemented using a technique called OBB (Oriented Bounding Boxes) collision detection. 
+ * The theorem behind is SAT-Separating axis theorem. For reference: https://en.wikipedia.org/wiki/Hyperplane_separation_theorem
+**/
+
 // check if there's a separating plane in between the selected axes
+// box1, box2 are the bounding boxes build around the objects coords (the box is the smallest possible that can encapsulate the object)
+// Plane is the one that is checked to exist or not between the boxes 
+// Rpos is the difference in position between box1, and box2
 function getSeparatingPlane(RPos, Plane, box1, box2)
 {
     return (Math.abs(utils.dotVector(RPos, Plane)) > 
@@ -11,6 +19,7 @@ function getSeparatingPlane(RPos, Plane, box1, box2)
 }
 
 // test for separating planes in all 15 axes
+// 9+6 axes: 6 for box1 and box2 separately, and 9 because we compute the normal vector to all the possible intersections between box1 and box2 planes
 function getCollision(box1, box2)
 {
     var RPos;
@@ -38,7 +47,9 @@ function checkCollision(objectId, objectB) {
 
         for (i=0; i < loadedObjects.length; i++) { 
             //rebuild object position/dimension for collision check
-               
+            //ObjectA is the variable that takes one at a time the objects loaded in the scene
+            //origin of the object is fixed, all the time we update the position of the object by summing up all the transformation applied by the user.
+            //ObjectB is the current moving object
 			
             objectA = {
 				AxisX: utils.makeAxisX(loadedObjects[i].currentRotation),

@@ -11,7 +11,7 @@ Assets from:
 ## Use case
 
 When you have nothing to do why not designing a new room?
-Maybe for the baby, to work or meditate
+Maybe for the baby, an office for work or a place to meditate and relax.
 
 [Preview](https://planner.dueacaso.it)
 
@@ -32,3 +32,16 @@ Maybe for the baby, to work or meditate
 * Use z and x to scale the object.
 * Use q and e to rotate the object along y axis.
 * Use u and i to move along y axis.
+
+##ToDO list
+
+* Make the user import 3d models (correctly scaled and resized for the scene;
+* Insert the feature of selecting the textures for the furniture, and the room;
+* Make a 2D view where the user can draw the shape of the room (or rooms) adding also doors and windows and creating the stuff once done;
+* Insert point/spot lights to simulate illumination of a room;
+* Set visibility of a ceiling of a room (enable/disable);
+* Re-add the skybox (better than the one implemented so far, and then removed);
+* Add decorations for gardening (outdoor living/gardening/etc);
+* Set a virtual tour visitor to allow the user with using w-a-s-d to go and look around as if he/she is in the scene;
+* Improve shaders to make realistic rendering;
+* Introduce shadows (even simple ones).

@@ -91,7 +91,7 @@ var lightDirection = [Math.cos(dirLightAlpha) * Math.cos(dirLightBeta),
 
 var objectSpecularPower = 20.0;
 
-var lightPosition = [0.0, 3.0, 0.0];
+var lightPosition = [0.0, 6.0, 0.0];
 var lightColor = new Float32Array([1.0, 1.0, 1.0, 1.0]);
 
 /** 
@@ -126,7 +126,7 @@ function main(){
         utils.resizeCanvasToDisplaySize(gl.canvas);
 		//console.log(gl.canvas.width, gl.canvas.height);
         gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-        gl.clearColor(0.85, 0.85, 0.85, 1.0); 
+        gl.clearColor(0.906, 0.976, 1.0, 1.0); 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST);
 		loadShaders();
@@ -171,7 +171,7 @@ function loadModel(modelName) {
         var vertexBufferObjectId= new Array();
         var indexBufferObjectId = new Array();
 
-        utils.get_json(modelsDir + objectCharacteristics.location, function(loadedModel){roomModel = loadedModel;});
+        utils.get_json(modelsDir + objectCharacteristics.location, function(loadedModel){objectModel = loadedModel;});
 
         if (objectCharacteristics.type == room) {
                 if (roomLoaded) {
@@ -182,7 +182,7 @@ function loadModel(modelName) {
                     roomLoaded = true;
                 }
         }
-        sceneObjects = roomModel.meshes.length; 
+        sceneObjects = objectModel.meshes.length; 
         perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, nearPlane, farPlane);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
         vao = gl.createVertexArray();
@@ -210,23 +210,23 @@ function loadModel(modelName) {
         for (i=0; i < sceneObjects ; i++) {        
 
             //creating the objects' world matrix
-            objectWorldMatrix[i] = roomModel.rootnode.children[i].transformation;      
-            var meshMatIndex = roomModel.meshes[i].materialindex;
+            objectWorldMatrix[i] = objectModel.rootnode.children[i].transformation;      
+            var meshMatIndex = objectModel.meshes[i].materialindex;
             var UVFileNamePropertyIndex = -1;
             var diffuseColorPropertyIndex = -1;
             var specularColorPropertyIndex = -1;
-            for (n = 0; n < roomModel.materials[meshMatIndex].properties.length; n++){
-                if(roomModel.materials[meshMatIndex].properties[n].key == "$tex.file") UVFileNamePropertyIndex = n;
-                if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.diffuse") diffuseColorPropertyIndex = n;
-                if(roomModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
+            for (n = 0; n < objectModel.materials[meshMatIndex].properties.length; n++){
+                if(objectModel.materials[meshMatIndex].properties[n].key == "$tex.file") UVFileNamePropertyIndex = n;
+                if(objectModel.materials[meshMatIndex].properties[n].key == "$clr.diffuse") diffuseColorPropertyIndex = n;
+                if(objectModel.materials[meshMatIndex].properties[n].key == "$clr.specular") specularColorPropertyIndex = n;
             }
 
 			//*** Getting vertex and normals                    
             var objVertex = [];
-            for (n = 0; n < roomModel.meshes[i].vertices.length/3; n++){
-                var x = roomModel.meshes[i].vertices[n*3];
-                var y = roomModel.meshes[i].vertices[n*3+1];
-                var z = roomModel.meshes[i].vertices[n*3+2];
+            for (n = 0; n < objectModel.meshes[i].vertices.length/3; n++){
+                var x = objectModel.meshes[i].vertices[n*3];
+                var y = objectModel.meshes[i].vertices[n*3+1];
+                var z = objectModel.meshes[i].vertices[n*3+2];
                 objVertex.push(x, y, z);
 
                 if (x < minVertX)
@@ -243,16 +243,16 @@ function loadModel(modelName) {
                     minVertZ = z;
                 if (z > maxVertZ)
                     maxVertZ = z;
-
+                //used to have the grid at the beginning
                 if (objectCharacteristics.type == solid) {
                         objVertex.push(0.0, 0.0, 0.0, 0.0, 0.0)
                 } else {
-                    objVertex.push(roomModel.meshes[i].normals[n*3],
-                                   roomModel.meshes[i].normals[n*3+1],
-                                   roomModel.meshes[i].normals[n*3+2]);
-                    if(UVFileNamePropertyIndex>=0 && roomModel.meshes[i].texturecoords){
-                        objVertex.push( roomModel.meshes[i].texturecoords[0][n*2],
-                                        1.0 - roomModel.meshes[i].texturecoords[0][n*2+1]);
+                    objVertex.push(objectModel.meshes[i].normals[n*3],
+                                   objectModel.meshes[i].normals[n*3+1],
+                                   objectModel.meshes[i].normals[n*3+2]);
+                    if(UVFileNamePropertyIndex>=0 && objectModel.meshes[i].texturecoords){
+                        objVertex.push( objectModel.meshes[i].texturecoords[0][n*2],
+                                        1.0 - objectModel.meshes[i].texturecoords[0][n*2+1]);
 
                     } else {
                         objVertex.push( 0.0, 0.0);
@@ -260,24 +260,24 @@ function loadModel(modelName) {
                 }   
             }
 
-            facesNumber[i] = roomModel.meshes[i].faces.length; 
+            facesNumber[i] = objectModel.meshes[i].faces.length; 
             console.log("Face Number: "+facesNumber[i]);
 
 			if(UVFileNamePropertyIndex>=0){
                 nTexture[i]=true;
-                console.log(roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
-                imageName = roomModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
+                console.log(objectModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value);
+                imageName = objectModel.materials[meshMatIndex].properties[UVFileNamePropertyIndex].value;
                 imageName = objectCharacteristics.location.split('/')[0] + '/' + imageName;
 			diffuseTextureObj[i] = getTexture(modelsDir + imageName);
         	} else {
                         nTexture[i] = false;
             }
 			//*** mesh color
-            diffuseColor[i] = roomModel.materials[meshMatIndex].properties[diffuseColorPropertyIndex].value; // diffuse value
+            diffuseColor[i] = objectModel.materials[meshMatIndex].properties[diffuseColorPropertyIndex].value; // diffuse value
 
             diffuseColor[i].push(1.0); // Alpha value added
 
-            specularColor[i] = roomModel.materials[meshMatIndex].properties[specularColorPropertyIndex].value;
+            specularColor[i] = objectModel.materials[meshMatIndex].properties[specularColorPropertyIndex].value;
             console.log("Specular: "+ specularColor[i]);
             vertexBufferObjectId[i] = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexBufferObjectId[i]);
@@ -285,18 +285,18 @@ function loadModel(modelName) {
 
 			//Creating index buffer
             facesData = [];
-            for (n = 0; n < roomModel.meshes[i].faces.length; n++){
-                facesData.push( roomModel.meshes[i].faces[n][0],
-                                roomModel.meshes[i].faces[n][1],
-                                roomModel.meshes[i].faces[n][2]
+            for (n = 0; n < objectModel.meshes[i].faces.length; n++){
+                facesData.push( objectModel.meshes[i].faces[n][0],
+                                objectModel.meshes[i].faces[n][1],
+                                objectModel.meshes[i].faces[n][2]
                                 );
             }
             indexBufferObjectId[i]=gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBufferObjectId[i]);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(facesData),gl.STATIC_DRAW);
         } 
-
         //push all the required info about a loaded model, used to computations when applying transformations to the object etc
+        //currentN are used to sum up all the transformation applied to the object, instead the origin of the object remains fixed. This could be helpful to allow a reset series of transformation applied. The origin is used also to apply the transformation around the middle of the object.
         loadedObjects.push({
             u_id: id,
             isRoom: objectCharacteristics.type == room,
@@ -318,7 +318,7 @@ function loadModel(modelName) {
             currentRotation: 0,
             currentScale: 1,
             currentMoveZ: 0,
-            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY : (objectCharacteristics.type == room ? -minVertY : -minVertY),
+            currentMoveY: 'currentMoveY' in objectCharacteristics ? objectCharacteristics.currentMoveY :  -minVertY,
             currentMoveX: 0,
             x: maxVertX - minVertX,
             y: maxVertY - minVertY,
@@ -366,7 +366,7 @@ function loadModel(modelName) {
             // ------ Draw the objects to the texture --------
 
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
+            //picking shader. It is faster since using the GPU avoiding doing it in JS 
             drawObjects(2);
         
             /**
@@ -505,6 +505,7 @@ function drawObjects(shaderProgramNumber) {
                     if (todraw.type == room) {
                             var u_id = new Array(4);
                     } else {
+                        //bit mask to take an integer and split it in 4 bytes; the id given to the object is split to apply it over the faces of the object
                         var u_id =  [
                           ((todraw.u_id >>  0) & 0xFF) / 0xFF,
                           ((todraw.u_id >>  8) & 0xFF) / 0xFF,
