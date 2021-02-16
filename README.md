@@ -35,7 +35,7 @@ Maybe for the baby, an office for work or a place to meditate and relax.
 
 ## ToDO list
 
-* Make the user import 3d models (correctly scaled and resized for the scene;
+* Make the user import 3d models (correctly scaled and resized for the scene);
 * Insert the feature of selecting the textures for the furniture, and the room;
 * Make a 2D view where the user can draw the shape of the room (or rooms) adding also doors and windows and creating the stuff once done;
 * Insert point/spot lights to simulate illumination of a room;
@@ -46,3 +46,4 @@ Maybe for the baby, an office for work or a place to meditate and relax.
 * Improve shaders to make realistic rendering;
 * Introduce shadows (even simple ones).
 * Add functionality with both Phong and Gouraud shading (by switching in between them).
+* Implement the picking of the object (selection) using ray casting, and not the pick shader (for the moment it is quite less optimized).
