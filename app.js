@@ -499,6 +499,7 @@ function drawObjects(shaderProgramNumber) {
     
                     gl.enableVertexAttribArray(vertexUVHandle[currentShader]);
                     gl.vertexAttribPointer(vertexUVHandle[currentShader], 2, gl.FLOAT, gl.FALSE, 4 * 8, 4 * 6);
+                    /** DRAWING THE ELEMENTS PASSING ALL THE STUFF TO THE GPU!**/
                     gl.drawElements(gl.TRIANGLES, todraw.facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
                     gl.disableVertexAttribArray(vertexPositionHandle[currentShader]);
                     gl.disableVertexAttribArray(vertexNormalHandle[currentShader]);
@@ -533,6 +534,7 @@ function drawObjects(shaderProgramNumber) {
                     }
                     gl.vertexAttribPointer(positionHandle, 3, gl.FLOAT, gl.FALSE, 4 * 8, 0);
                     gl.enableVertexAttribArray(positionHandle);
+                    /** DRAWING THE ELEMENTS PASSING ALL THE STUFF TO THE GPU!**/
                     gl.drawElements(gl.TRIANGLES, todraw.facesNumber[i]*3, gl.UNSIGNED_SHORT, 0);
                     gl.disableVertexAttribArray(positionHandle);
                 }
