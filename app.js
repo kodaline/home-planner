@@ -187,7 +187,7 @@ function loadModel(modelName) {
                 }
         }
         sceneObjects = objectModel.meshes.length; 
-        perspectiveMatrix = utils.MakePerspective(90, gl.canvas.width/gl.canvas.height, nearPlane, farPlane);
+        perspectiveMatrix = utils.MakePerspective(70, gl.canvas.width/gl.canvas.height, nearPlane, farPlane);
         viewMatrix = utils.MakeView(1.5, 1.9, 3.0, 10.0, 30.0);
         vao = gl.createVertexArray();
         gl.bindVertexArray(vao);

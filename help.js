@@ -87,6 +87,7 @@ function topView() {
 function resetView() {
         elevation = -25;
         angle = -15;
+        lookRadius = 10.0;
 }
 
 //The button used to disable or enable collision
